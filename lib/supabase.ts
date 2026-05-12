@@ -1,8 +1,5 @@
 // =========================================================
 // Supabase Client + Data Fetching
-// Drop-in replacement for lib/wordpress.ts
-// Keeps the same Artist/Agent type shape so existing pages
-// need only minor changes (camelCase → snake_case fields).
 // =========================================================
 
 import { createClient } from '@supabase/supabase-js'
@@ -14,7 +11,6 @@ export const supabase = createClient(
 )
 
 // ADMIN client — server-only. Bypasses RLS. NEVER import in client components.
-// Used by API routes for inserts/updates/file uploads as the form submitter.
 export function getServiceClient() {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set')
@@ -47,9 +43,11 @@ export interface Agent {
   slug: string
   name: string
   email: string | null
+  contact_email: string | null
   bio: string | null
   photo_url: string | null
-  role: string[] | null
+  role: string | null
+  role_order: number | null
   instagram: string | null
   linkedin: string | null
 }
@@ -79,7 +77,7 @@ export interface Artist {
 }
 
 // =========================================================
-// FETCH FUNCTIONS (server components)
+// FETCH FUNCTIONS
 // =========================================================
 
 const ARTIST_SELECT = `
@@ -88,13 +86,12 @@ const ARTIST_SELECT = `
   academy_artist, featured_artist,
   instagram, spotify, soundcloud, facebook, tiktok,
   spotlight_1, spotlight_2, spotlight_3, spotlight_4,
-  primary_agent:agents!primary_agent_id (id, slug, name, email, bio, photo_url, role, instagram, linkedin),
-  secondary_agent:agents!secondary_agent_id (id, slug, name, email, bio, photo_url, role, instagram, linkedin),
+  primary_agent:agents!primary_agent_id (id, slug, name, email, contact_email, bio, photo_url, role, role_order, instagram, linkedin),
+  secondary_agent:agents!secondary_agent_id (id, slug, name, email, contact_email, bio, photo_url, role, role_order, instagram, linkedin),
   artist_genres ( genres ( id, slug, name ) ),
   artist_locations ( locations ( id, slug, name ) )
 `
 
-// Reshape Supabase nested rows into the flat Artist type the UI expects
 function shapeArtist(row: any): Artist {
   return {
     id: row.id,
@@ -125,7 +122,6 @@ export async function getAllArtists(): Promise<Artist[]> {
   const { data, error } = await supabase
     .from('artists')
     .select(ARTIST_SELECT)
-    .eq('status', 'published')
     .order('name', { ascending: true })
 
   if (error) {
@@ -139,7 +135,6 @@ export async function getFeaturedArtists(): Promise<Artist[]> {
   const { data, error } = await supabase
     .from('artists')
     .select(ARTIST_SELECT)
-    .eq('status', 'published')
     .eq('featured_artist', true)
     .order('name', { ascending: true })
 
@@ -155,7 +150,6 @@ export async function getArtistBySlug(slug: string): Promise<Artist | null> {
     .from('artists')
     .select(ARTIST_SELECT)
     .eq('slug', slug)
-    .eq('status', 'published')
     .maybeSingle()
 
   if (error) {
@@ -169,6 +163,7 @@ export async function getAllAgents(): Promise<Agent[]> {
   const { data, error } = await supabase
     .from('agents')
     .select('*')
+    .order('role_order', { ascending: true, nullsFirst: false })
     .order('name', { ascending: true })
   if (error) return []
   return data || []
