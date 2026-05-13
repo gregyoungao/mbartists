@@ -32,9 +32,21 @@ interface Props {
   genres: { id: string; name: string }[]
   locations: { id: string; name: string }[]
   mode: 'create' | 'edit'
+  // When true, agent can't change the primary agent field (locked to themselves)
+  lockPrimaryAgent?: boolean
+  // Where to redirect after save (default '/admin/artists')
+  redirectTo?: string
 }
 
-export default function ArtistForm({ initial, agents, genres, locations, mode }: Props) {
+export default function ArtistForm({
+  initial,
+  agents,
+  genres,
+  locations,
+  mode,
+  lockPrimaryAgent,
+  redirectTo = '/admin/artists',
+}: Props) {
   const router = useRouter()
 
   const [name, setName] = useState(initial.name || '')
@@ -72,6 +84,9 @@ export default function ArtistForm({ initial, agents, genres, locations, mode }:
       prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id]
     )
   }
+
+  // The primary agent's name (for display when locked)
+  const primaryAgentName = agents.find((a) => a.id === primaryAgentId)?.name || ''
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -118,7 +133,7 @@ export default function ArtistForm({ initial, agents, genres, locations, mode }:
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Save failed')
 
-      router.push('/admin/artists')
+      router.push(redirectTo)
       router.refresh()
     } catch (err: any) {
       setError(err.message)
@@ -160,8 +175,17 @@ export default function ArtistForm({ initial, agents, genres, locations, mode }:
         />
       </Field>
 
-      <Field label="Primary Agent *">
-        <Select value={primaryAgentId} onChange={setPrimaryAgentId} options={agents} placeholder="Select an agent" required />
+      <Field label="Primary Agent *" hint={lockPrimaryAgent ? "You are assigned as the primary agent for artists you create." : undefined}>
+        {lockPrimaryAgent ? (
+          <div
+            className="p-3 border font-mono text-sm"
+            style={{ borderColor: '#222', background: '#0a0a0a', color: '#4E7DFE' }}
+          >
+            {primaryAgentName || '(you)'}
+          </div>
+        ) : (
+          <Select value={primaryAgentId} onChange={setPrimaryAgentId} options={agents} placeholder="Select an agent" required />
+        )}
       </Field>
 
       <Field label="Secondary Agent">

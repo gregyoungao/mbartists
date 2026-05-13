@@ -1,6 +1,6 @@
 // =========================================================
-// POST /api/admin/update-agent
-// Admin-only: updates an existing agent record.
+// POST /api/agent/update-profile
+// Agent updates their own profile (not role, not login email).
 // =========================================================
 
 import { NextResponse } from 'next/server'
@@ -9,7 +9,7 @@ import { getCurrentUser } from '@/lib/auth'
 
 export async function POST(req: Request) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== 'agent' || !user.agentId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -17,13 +17,10 @@ export async function POST(req: Request) {
     const fd = await req.formData()
     const supabase = getServiceClient()
 
-    const agentId = String(fd.get('agentId') || '')
-    if (!agentId) return NextResponse.json({ error: 'agentId is required' }, { status: 400 })
-
     const { data: existing } = await supabase
       .from('agents')
       .select('id, slug, photo_url')
-      .eq('id', agentId)
+      .eq('id', user.agentId)
       .maybeSingle()
     if (!existing) return NextResponse.json({ error: 'Agent not found' }, { status: 404 })
 
@@ -44,20 +41,23 @@ export async function POST(req: Request) {
       photo_url = pub.publicUrl
     }
 
-    const updates: any = {
+    const updates = {
       name: String(fd.get('name') || '').trim(),
       contact_email: String(fd.get('contactEmail') || '').trim() || null,
-      bio: String(fd.get('bio') || '').trim(),
-      role: String(fd.get('role') || '').trim(),
+      bio: String(fd.get('bio') || '').trim() || null,
       instagram: String(fd.get('instagram') || '').trim() || null,
       linkedin: String(fd.get('linkedin') || '').trim() || null,
       photo_url,
     }
 
+    if (!updates.name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    }
+
     const { error: updateErr } = await supabase
       .from('agents')
       .update(updates)
-      .eq('id', agentId)
+      .eq('id', user.agentId)
 
     if (updateErr) {
       return NextResponse.json({ error: updateErr.message }, { status: 500 })
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true })
   } catch (err: any) {
-    console.error('update-agent error:', err)
+    console.error('update-profile error:', err)
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 })
   }
 }
