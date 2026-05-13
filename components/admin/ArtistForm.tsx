@@ -133,8 +133,8 @@ export default function ArtistForm({
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Save failed')
 
-      router.push(redirectTo)
-      router.refresh()
+      // Force a hard navigation to ensure auth cookie is fresh
+window.location.href = redirectTo
     } catch (err: any) {
       setError(err.message)
       setSubmitting(false)
