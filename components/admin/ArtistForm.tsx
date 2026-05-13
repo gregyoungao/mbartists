@@ -73,6 +73,7 @@ export default function ArtistForm({
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   const toggleGenre = (id: string) => {
     setSelectedGenres((prev) =>
@@ -90,6 +91,8 @@ export default function ArtistForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSuccess(null)
+
     if (selectedGenres.length === 0) {
       setError('At least one genre is required.')
       return
@@ -133,9 +136,16 @@ export default function ArtistForm({
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Save failed')
 
-      // Wait a moment for cookies to settle, then redirect
-      await new Promise(resolve => setTimeout(resolve, 800))
-      window.location.href = redirectTo
+      // Show success message and scroll to top
+      setSuccess(mode === 'create' ? 'Artist created successfully.' : 'Changes saved.')
+      setSubmitting(false)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+
+      // Auto-redirect after a moment so user sees confirmation
+      // and so the auth cookie has time to settle for the dashboard check
+      setTimeout(() => {
+        window.location.href = redirectTo
+      }, 1500)
     } catch (err: any) {
       setError(err.message)
       setSubmitting(false)
@@ -147,6 +157,14 @@ export default function ArtistForm({
       {error && (
         <div className="p-4 border" style={{ borderColor: '#ff4444', background: '#1a0000' }}>
           <p className="font-mono text-sm" style={{ color: '#ff6666' }}>{error}</p>
+        </div>
+      )}
+      {success && (
+        <div
+          className="p-4 border"
+          style={{ borderColor: '#4E7DFE', background: 'rgba(78, 125, 254, 0.08)' }}
+        >
+          <p className="font-mono text-sm" style={{ color: '#4E7DFE' }}>{success}</p>
         </div>
       )}
 
@@ -241,11 +259,11 @@ export default function ArtistForm({
 
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || !!success}
         className="w-full font-mono text-xs uppercase tracking-widest py-4 transition-colors disabled:opacity-50"
         style={{ background: '#4E7DFE', color: '#000' }}
       >
-        {submitting ? 'Saving...' : mode === 'create' ? 'Create Artist' : 'Save Changes'}
+        {submitting ? 'Saving...' : success ? 'Saved' : mode === 'create' ? 'Create Artist' : 'Save Changes'}
       </button>
     </form>
   )
