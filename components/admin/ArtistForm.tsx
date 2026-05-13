@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 interface ArtistFormInitial {
   id?: string
@@ -32,9 +33,7 @@ interface Props {
   genres: { id: string; name: string }[]
   locations: { id: string; name: string }[]
   mode: 'create' | 'edit'
-  // When true, agent can't change the primary agent field (locked to themselves)
   lockPrimaryAgent?: boolean
-  // Where to redirect after save (default '/admin/artists')
   redirectTo?: string
 }
 
@@ -73,7 +72,7 @@ export default function ArtistForm({
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
 
   const toggleGenre = (id: string) => {
     setSelectedGenres((prev) =>
@@ -86,12 +85,11 @@ export default function ArtistForm({
     )
   }
 
-  // The primary agent's name (for display when locked)
   const primaryAgentName = agents.find((a) => a.id === primaryAgentId)?.name || ''
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSuccess(null)
+    setError(null)
 
     if (selectedGenres.length === 0) {
       setError('At least one genre is required.')
@@ -107,7 +105,6 @@ export default function ArtistForm({
     }
 
     setSubmitting(true)
-    setError(null)
 
     try {
       const fd = new FormData()
@@ -136,20 +133,59 @@ export default function ArtistForm({
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Save failed')
 
-      // Show success message and scroll to top
-      setSuccess(mode === 'create' ? 'Artist created successfully.' : 'Changes saved.')
+      setSaved(true)
       setSubmitting(false)
       window.scrollTo({ top: 0, behavior: 'smooth' })
-
-      // Auto-redirect after a moment so user sees confirmation
-      // and so the auth cookie has time to settle for the dashboard check
-      setTimeout(() => {
-        window.location.href = redirectTo
-      }, 1500)
     } catch (err: any) {
       setError(err.message)
       setSubmitting(false)
     }
+  }
+
+  // After successful save, show a confirmation panel instead of the form
+  if (saved) {
+    const backLabel = redirectTo.includes('dashboard') ? 'My Roster' : 'Artists'
+    return (
+      <div className="max-w-3xl">
+        <div
+          className="p-8 border mb-6"
+          style={{ borderColor: '#4E7DFE', background: 'rgba(78, 125, 254, 0.08)' }}
+        >
+          <p
+            className="font-mono text-xs tracking-widest uppercase mb-3"
+            style={{ color: '#4E7DFE' }}
+          >
+            {'// Success'}
+          </p>
+          <h2 className="text-2xl font-bold mb-2">
+            {mode === 'create' ? 'Artist created' : 'Changes saved'}
+          </h2>
+          <p style={{ color: '#888' }}>
+            {mode === 'create'
+              ? `${name} has been added to the roster.`
+              : `Your changes to ${name} have been saved.`}
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link
+            href={redirectTo}
+            className="flex-1 text-center font-mono text-xs uppercase tracking-widest px-6 py-4 transition-colors"
+            style={{ background: '#4E7DFE', color: '#000' }}
+          >
+            ← Back to {backLabel}
+          </Link>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="flex-1 font-mono text-xs uppercase tracking-widest px-6 py-4 border transition-colors hover:border-[#4E7DFE] hover:text-[#4E7DFE]"
+            style={{ borderColor: '#222', color: '#888' }}
+          >
+            {mode === 'create' ? 'Add Another' : 'Edit Again'}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -157,14 +193,6 @@ export default function ArtistForm({
       {error && (
         <div className="p-4 border" style={{ borderColor: '#ff4444', background: '#1a0000' }}>
           <p className="font-mono text-sm" style={{ color: '#ff6666' }}>{error}</p>
-        </div>
-      )}
-      {success && (
-        <div
-          className="p-4 border"
-          style={{ borderColor: '#4E7DFE', background: 'rgba(78, 125, 254, 0.08)' }}
-        >
-          <p className="font-mono text-sm" style={{ color: '#4E7DFE' }}>{success}</p>
         </div>
       )}
 
@@ -259,11 +287,11 @@ export default function ArtistForm({
 
       <button
         type="submit"
-        disabled={submitting || !!success}
+        disabled={submitting}
         className="w-full font-mono text-xs uppercase tracking-widest py-4 transition-colors disabled:opacity-50"
         style={{ background: '#4E7DFE', color: '#000' }}
       >
-        {submitting ? 'Saving...' : success ? 'Saved' : mode === 'create' ? 'Create Artist' : 'Save Changes'}
+        {submitting ? 'Saving...' : mode === 'create' ? 'Create Artist' : 'Save Changes'}
       </button>
     </form>
   )
