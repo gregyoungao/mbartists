@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/artists", label: "Artists" },
   { href: "/agents", label: "Agents" },
+  { href: "/book", label: "Book an Artist" },
   { href: "/contact", label: "Contact" },
 ]
 
@@ -47,39 +48,64 @@ export default function Navigation() {
           MB Artists
         </Link>
 
-        {/* Menu toggle button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-3 font-mono text-xs tracking-widest uppercase transition-colors duration-200"
-          style={{ color: isOpen ? "#4E7DFE" : "#fff" }}
-          aria-expanded={isOpen}
-          aria-label={isOpen ? "Close menu" : "Open menu"}
-        >
-          <span>{isOpen ? "Close" : "Menu"}</span>
-          <div className="relative w-5 h-3 flex flex-col justify-between">
-            <span
-              className="block w-full h-[1.5px] transition-all duration-300 origin-center"
-              style={{
-                background: isOpen ? "#4E7DFE" : "#fff",
-                transform: isOpen ? "translateY(5.25px) rotate(45deg)" : "none",
-              }}
-            />
-            <span
-              className="block w-full h-[1.5px] transition-all duration-300"
-              style={{
-                background: isOpen ? "#4E7DFE" : "#fff",
-                opacity: isOpen ? 0 : 1,
-              }}
-            />
-            <span
-              className="block w-full h-[1.5px] transition-all duration-300 origin-center"
-              style={{
-                background: isOpen ? "#4E7DFE" : "#fff",
-                transform: isOpen ? "translateY(-5.25px) rotate(-45deg)" : "none",
-              }}
-            />
-          </div>
-        </button>
+        <div className="flex items-center gap-4 md:gap-6">
+          {/* Make an Enquiry button */}
+          <Link
+            href="/book"
+            className="font-mono text-xs tracking-widest uppercase px-4 py-2 border transition-all duration-200"
+            style={{
+              borderColor: "#4E7DFE",
+              color: pathname === "/book" ? "#000" : "#4E7DFE",
+              background: pathname === "/book" ? "#4E7DFE" : "transparent",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#4E7DFE"
+              e.currentTarget.style.color = "#000"
+            }}
+            onMouseLeave={(e) => {
+              if (pathname !== "/book") {
+                e.currentTarget.style.background = "transparent"
+                e.currentTarget.style.color = "#4E7DFE"
+              }
+            }}
+          >
+            Make an Enquiry
+          </Link>
+
+          {/* Menu toggle button */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex items-center gap-3 font-mono text-xs tracking-widest uppercase transition-colors duration-200"
+            style={{ color: isOpen ? "#4E7DFE" : "#fff" }}
+            aria-expanded={isOpen}
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+          >
+            <span>{isOpen ? "Close" : "Menu"}</span>
+            <div className="relative w-5 h-3 flex flex-col justify-between">
+              <span
+                className="block w-full h-[1.5px] transition-all duration-300 origin-center"
+                style={{
+                  background: isOpen ? "#4E7DFE" : "#fff",
+                  transform: isOpen ? "translateY(5.25px) rotate(45deg)" : "none",
+                }}
+              />
+              <span
+                className="block w-full h-[1.5px] transition-all duration-300"
+                style={{
+                  background: isOpen ? "#4E7DFE" : "#fff",
+                  opacity: isOpen ? 0 : 1,
+                }}
+              />
+              <span
+                className="block w-full h-[1.5px] transition-all duration-300 origin-center"
+                style={{
+                  background: isOpen ? "#4E7DFE" : "#fff",
+                  transform: isOpen ? "translateY(-5.25px) rotate(-45deg)" : "none",
+                }}
+              />
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Expanding menu panel */}
