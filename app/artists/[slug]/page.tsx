@@ -1,7 +1,7 @@
 // =========================================================
 // app/artists/[slug]/page.tsx
 // Server component — fetches artist from Supabase.
-// Replaces the old client-component sample data version.
+// Step 6 update: adds an embedded booking enquiry form.
 // =========================================================
 
 import { notFound } from 'next/navigation'
@@ -9,6 +9,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Navigation from '@/components/nav/Navigation'
 import FeaturedTracks from '@/components/tracks/FeaturedTracks'
+import EnquiryForm from '@/components/enquiry/EnquiryForm'
 import {
   getAllArtists,
   getArtistBySlug,
@@ -151,6 +152,24 @@ export default async function ArtistPage({
               <Stat label="Genres" value={String(artist.genres.length)} />
               <Stat label="Tracks" value={String(tracks.length)} />
               <Stat label="Status" value={artist.featured_artist ? 'Featured' : 'Active'} highlight />
+            </div>
+
+            {/* Booking enquiry */}
+            <div className="border-t pt-12 mb-20" style={{ borderColor: '#1a1a1a' }}>
+              <h2 className="font-mono text-xs tracking-widest uppercase mb-2" style={{ color: '#4E7DFE' }}>
+                {'// Book ' + artist.name}
+              </h2>
+              <p className="mb-8" style={{ color: '#666' }}>
+                Interested in booking {artist.name}? Send an enquiry and the
+                agent will be in touch.
+              </p>
+              <div className="max-w-3xl">
+                <EnquiryForm
+                  artists={[{ id: artist.id, name: artist.name }]}
+                  lockedArtistId={artist.id}
+                  lockedArtistName={artist.name}
+                />
+              </div>
             </div>
 
             {/* Socials */}
