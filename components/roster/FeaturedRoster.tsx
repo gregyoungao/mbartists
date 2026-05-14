@@ -20,6 +20,7 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [isPaused, setIsPaused] = useState(false)
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -38,6 +39,29 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
     }
   }, [])
 
+  // Auto-slider — advances every 3s, pauses on hover, loops back to start
+  useEffect(() => {
+    if (isPaused || artists.length === 0) return
+
+    const interval = setInterval(() => {
+      const el = scrollRef.current
+      if (!el) return
+
+      const { scrollLeft, scrollWidth, clientWidth } = el
+      const atEnd = scrollLeft >= scrollWidth - clientWidth - 10
+
+      if (atEnd) {
+        // Loop back to the beginning
+        el.scrollTo({ left: 0, behavior: "smooth" })
+      } else {
+        // Advance by one card width (280px + 16px gap)
+        el.scrollBy({ left: 296, behavior: "smooth" })
+      }
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [isPaused, artists.length])
+
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const scrollAmount = 400
@@ -53,7 +77,12 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
   }
 
   return (
-    <section className="relative py-16 md:py-24" style={{ background: "#000" }}>
+    <section
+      className="relative py-16 md:py-24"
+      style={{ background: "#000" }}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       {/* Section header */}
       <div className="px-6 md:px-12 mb-8 flex items-end justify-between">
         <div>
