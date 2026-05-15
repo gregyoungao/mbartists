@@ -9,15 +9,17 @@ interface ArtistOption {
 
 interface Props {
   artists: ArtistOption[]
-  // When set, the artist is pre-selected and locked (used on artist detail pages)
   lockedArtistId?: string
   lockedArtistName?: string
+  // 'dark' = white text on dark bg (default), 'light' = dark text on light bg
+  theme?: "light" | "dark"
 }
 
 export default function EnquiryForm({
   artists,
   lockedArtistId,
   lockedArtistName,
+  theme = "dark",
 }: Props) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -33,6 +35,19 @@ export default function EnquiryForm({
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
+
+  // Theme-aware colors
+  const isLight = theme === "light"
+  const c = {
+    label: isLight ? "#666" : "#888",
+    inputText: isLight ? "#0a0a0a" : "#fff",
+    inputBorder: isLight ? "#ccc" : "#222",
+    divider: isLight ? "#d4cfc6" : "#333",
+    chipBorder: isLight ? "#ccc" : "#222",
+    chipText: isLight ? "#444" : "#666",
+    errorBg: isLight ? "#ffeded" : "#1a0000",
+    accent: "#4E7DFE",
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,20 +93,25 @@ export default function EnquiryForm({
       <div
         className="p-8 border"
         style={{
-          borderColor: "#4E7DFE",
+          borderColor: c.accent,
           background: "rgba(78, 125, 254, 0.08)",
         }}
       >
         <p
           className="font-mono text-xs tracking-widest uppercase mb-3"
-          style={{ color: "#4E7DFE" }}
+          style={{ color: c.accent }}
         >
           {"// Enquiry Sent"}
         </p>
-        <h3 className="text-2xl font-bold mb-2">Thank you</h3>
-        <p style={{ color: "#888" }}>
-          Your enquiry has been received. The artist's agent will be in touch
-          with you soon.
+        <h3
+          className="text-2xl font-bold mb-2"
+          style={{ color: c.inputText }}
+        >
+          Thank you
+        </h3>
+        <p style={{ color: c.label }}>
+          Your enquiry has been received. The artist&apos;s agent will be in
+          touch with you soon.
         </p>
       </div>
     )
@@ -101,7 +121,7 @@ export default function EnquiryForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <p
         className="font-mono text-xs tracking-widest uppercase"
-        style={{ color: "#4E7DFE" }}
+        style={{ color: c.accent }}
       >
         Your Enquiry
       </p>
@@ -109,9 +129,9 @@ export default function EnquiryForm({
       {error && (
         <div
           className="p-4 border"
-          style={{ borderColor: "#ff4444", background: "#1a0000" }}
+          style={{ borderColor: "#ff4444", background: c.errorBg }}
         >
-          <p className="font-mono text-sm" style={{ color: "#ff6666" }}>
+          <p className="font-mono text-sm" style={{ color: "#cc0000" }}>
             {error}
           </p>
         </div>
@@ -119,50 +139,59 @@ export default function EnquiryForm({
 
       {/* Name + Email */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField label="Name *">
-          <TextInput value={name} onChange={setName} placeholder="Joe Bloggs" required />
+        <FormField label="Name *" labelColor={c.label}>
+          <TextInput
+            value={name}
+            onChange={setName}
+            placeholder="Joe Bloggs"
+            required
+            colors={c}
+          />
         </FormField>
-        <FormField label="Email *">
+        <FormField label="Email *" labelColor={c.label}>
           <TextInput
             value={email}
             onChange={setEmail}
             placeholder="joe@acmecorp.com"
             type="email"
             required
+            colors={c}
           />
         </FormField>
       </div>
 
       {/* Company + Location */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField label="Company Name *">
+        <FormField label="Company Name *" labelColor={c.label}>
           <TextInput
             value={organization}
             onChange={setOrganization}
             placeholder="Acme Corp"
             required
+            colors={c}
           />
         </FormField>
-        <FormField label="Location *">
+        <FormField label="Location *" labelColor={c.label}>
           <TextInput
             value={eventLocation}
             onChange={setEventLocation}
             placeholder="London, United Kingdom"
             required
+            colors={c}
           />
         </FormField>
       </div>
 
-      <Divider />
+      <Divider color={c.divider} />
 
       {/* Select Acts — single artist */}
-      <FormField label="Select Act *">
+      <FormField label="Select Act *" labelColor={c.label}>
         {lockedArtistId ? (
           <div
             className="inline-block font-mono text-xs px-4 py-2 border"
             style={{
-              borderColor: "#4E7DFE",
-              background: "#4E7DFE",
+              borderColor: c.accent,
+              background: c.accent,
               color: "#000",
             }}
           >
@@ -179,9 +208,9 @@ export default function EnquiryForm({
                   onClick={() => setArtistId(artist.id)}
                   className="font-mono text-xs px-4 py-2 border transition-all duration-200"
                   style={{
-                    borderColor: active ? "#4E7DFE" : "#222",
-                    background: active ? "#4E7DFE" : "transparent",
-                    color: active ? "#000" : "#666",
+                    borderColor: active ? c.accent : c.chipBorder,
+                    background: active ? c.accent : "transparent",
+                    color: active ? "#000" : c.chipText,
                   }}
                 >
                   {artist.name}
@@ -189,7 +218,10 @@ export default function EnquiryForm({
               )
             })}
             {artists.length === 0 && (
-              <p className="font-mono text-xs" style={{ color: "#444" }}>
+              <p
+                className="font-mono text-xs"
+                style={{ color: c.chipText }}
+              >
                 No artists available.
               </p>
             )}
@@ -197,46 +229,50 @@ export default function EnquiryForm({
         )}
       </FormField>
 
-      <Divider />
+      <Divider color={c.divider} />
 
       {/* Event Name + Proposed Offer */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField label="Event Name">
+        <FormField label="Event Name" labelColor={c.label}>
           <TextInput
             value={eventName}
             onChange={setEventName}
             placeholder="ABC Events"
+            colors={c}
           />
         </FormField>
-        <FormField label="Proposed Offer">
+        <FormField label="Proposed Offer" labelColor={c.label}>
           <TextInput
             value={proposedOffer}
             onChange={setProposedOffer}
             placeholder="£000.00"
+            colors={c}
           />
         </FormField>
       </div>
 
       {/* Ticket Price + Event Date */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField label="Ticket Price">
+        <FormField label="Ticket Price" labelColor={c.label}>
           <TextInput
             value={ticketPrice}
             onChange={setTicketPrice}
             placeholder="£00.00"
+            colors={c}
           />
         </FormField>
-        <FormField label="Event Date">
+        <FormField label="Event Date" labelColor={c.label}>
           <TextInput
             value={eventDate}
             onChange={setEventDate}
             type="date"
+            colors={c}
           />
         </FormField>
       </div>
 
       {/* Message */}
-      <FormField label="Your Message *">
+      <FormField label="Your Message *" labelColor={c.label}>
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -244,9 +280,9 @@ export default function EnquiryForm({
           rows={4}
           placeholder="Tell us more..."
           className="w-full bg-transparent border-b py-2 outline-none transition-colors resize-none"
-          style={{ borderColor: "#222", color: "#fff" }}
-          onFocus={(e) => (e.currentTarget.style.borderColor = "#4E7DFE")}
-          onBlur={(e) => (e.currentTarget.style.borderColor = "#222")}
+          style={{ borderColor: c.inputBorder, color: c.inputText }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = c.accent)}
+          onBlur={(e) => (e.currentTarget.style.borderColor = c.inputBorder)}
         />
       </FormField>
 
@@ -256,7 +292,7 @@ export default function EnquiryForm({
           type="submit"
           disabled={submitting}
           className="font-mono text-xs uppercase tracking-widest px-8 py-3 transition-colors disabled:opacity-50"
-          style={{ background: "#4E7DFE", color: "#000" }}
+          style={{ background: c.accent, color: "#000" }}
         >
           {submitting ? "Sending..." : "Submit Enquiry"}
         </button>
@@ -267,16 +303,18 @@ export default function EnquiryForm({
 
 function FormField({
   label,
+  labelColor,
   children,
 }: {
   label: string
+  labelColor: string
   children: React.ReactNode
 }) {
   return (
     <div>
       <label
         className="font-mono text-[10px] tracking-widest uppercase mb-2 block"
-        style={{ color: "#888" }}
+        style={{ color: labelColor }}
       >
         {label}
       </label>
@@ -285,18 +323,31 @@ function FormField({
   )
 }
 
+interface ColorPalette {
+  label: string
+  inputText: string
+  inputBorder: string
+  divider: string
+  chipBorder: string
+  chipText: string
+  errorBg: string
+  accent: string
+}
+
 function TextInput({
   value,
   onChange,
   placeholder,
   type = "text",
   required,
+  colors,
 }: {
   value: string
   onChange: (v: string) => void
   placeholder?: string
   type?: string
   required?: boolean
+  colors: ColorPalette
 }) {
   return (
     <input
@@ -306,18 +357,17 @@ function TextInput({
       placeholder={placeholder}
       required={required}
       className="w-full bg-transparent border-b py-2 outline-none transition-colors"
-      style={{ borderColor: "#222", color: "#fff" }}
-      onFocus={(e) => (e.currentTarget.style.borderColor = "#4E7DFE")}
-      onBlur={(e) => (e.currentTarget.style.borderColor = "#222")}
+      style={{ borderColor: colors.inputBorder, color: colors.inputText }}
+      onFocus={(e) => (e.currentTarget.style.borderColor = colors.accent)}
+      onBlur={(e) =>
+        (e.currentTarget.style.borderColor = colors.inputBorder)
+      }
     />
   )
 }
 
-function Divider() {
+function Divider({ color }: { color: string }) {
   return (
-    <div
-      className="border-t border-dotted"
-      style={{ borderColor: "#333" }}
-    />
+    <div className="border-t border-dotted" style={{ borderColor: color }} />
   )
 }
