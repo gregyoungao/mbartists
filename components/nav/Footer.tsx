@@ -3,6 +3,7 @@
 import Link from "next/link"
 
 const ACCENT = "#4E7DFE"
+const FOOTER_BG = "#272727"
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -10,7 +11,7 @@ export default function Footer() {
   return (
     <footer
       className="relative border-t"
-      style={{ background: "#000", borderColor: "#1a1a1a" }}
+      style={{ background: FOOTER_BG, borderColor: "#1a1a1a" }}
     >
       <div className="px-6 md:px-12 py-12 max-w-7xl mx-auto">
         {/* Contact + Follow row — centered, on top */}
@@ -25,7 +26,7 @@ export default function Footer() {
             <a
               href="mailto:support@mbartists.com"
               className="font-mono text-sm transition-colors duration-200 hover:text-[#4E7DFE]"
-              style={{ color: "#888" }}
+              style={{ color: "#aaa" }}
             >
               SUPPORT@MBARTISTS.COM
             </a>
@@ -45,9 +46,9 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Facebook"
                 className="transition-colors duration-200"
-                style={{ color: "#888" }}
+                style={{ color: "#aaa" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = ACCENT)}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#aaa")}
               >
                 <svg
                   width="20"
@@ -64,9 +65,9 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Instagram"
                 className="transition-colors duration-200"
-                style={{ color: "#888" }}
+                style={{ color: "#aaa" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = ACCENT)}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#aaa")}
               >
                 <svg
                   width="20"
@@ -83,9 +84,9 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Twitter"
                 className="transition-colors duration-200"
-                style={{ color: "#888" }}
+                style={{ color: "#aaa" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = ACCENT)}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#aaa")}
               >
                 <svg
                   width="20"
@@ -103,11 +104,11 @@ export default function Footer() {
         {/* Bottom bar — copyright | privacy | designed by */}
         <div
           className="pt-6 border-t flex flex-col md:flex-row items-center justify-between gap-4"
-          style={{ borderColor: "#1a1a1a" }}
+          style={{ borderColor: "#3a3a3a" }}
         >
           <p
             className="font-mono text-[10px] uppercase tracking-wider order-2 md:order-1"
-            style={{ color: "#444" }}
+            style={{ color: "#888" }}
           >
             All Rights Reserved MB Artists Ltd {year}
           </p>
@@ -115,14 +116,14 @@ export default function Footer() {
           <Link
             href="#"
             className="font-mono text-[10px] uppercase tracking-wider transition-colors hover:text-[#4E7DFE] order-1 md:order-2"
-            style={{ color: "#444" }}
+            style={{ color: "#888" }}
           >
             Privacy Policy
           </Link>
 
           <p
             className="font-mono text-[10px] uppercase tracking-wider order-3"
-            style={{ color: "#444" }}
+            style={{ color: "#888" }}
           >
             Designed by{" "}
             <a
