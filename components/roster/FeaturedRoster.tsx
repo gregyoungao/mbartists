@@ -3,6 +3,14 @@
 import { useRef, useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { Golos_Text } from "next/font/google"
+
+// Golos Text loaded only in this component — won't affect the rest of the site
+const golos = Golos_Text({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+})
 
 interface FeaturedArtist {
   slug: string
@@ -18,6 +26,9 @@ interface FeaturedRosterProps {
 const BG = "#EEE9E1"
 const INK = "#0a0a0a"
 const ACCENT = "#4E7DFE"
+
+// Card dimensions — 300x400 (3:4 portrait)
+const CARD_WIDTH = 300
 
 export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -38,7 +49,7 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
       if (atEnd) {
         el.scrollTo({ left: 0, behavior: "smooth" })
       } else {
-        el.scrollBy({ left: 296, behavior: "smooth" })
+        el.scrollBy({ left: CARD_WIDTH + 16, behavior: "smooth" })
       }
     }, 3000)
 
@@ -51,7 +62,7 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
 
   return (
     <section
-      className="relative py-20 md:py-28"
+      className={`relative py-20 md:py-28 ${golos.className}`}
       style={{ background: BG }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -86,12 +97,12 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
             key={artist.slug}
             href={`/artists/${artist.slug}`}
             className="group relative flex-shrink-0 overflow-hidden"
-            style={{ width: "280px" }}
+            style={{ width: `${CARD_WIDTH}px` }}
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
             <div
-              className="relative aspect-square overflow-hidden transition-all duration-300"
+              className="relative aspect-[3/4] overflow-hidden transition-all duration-300"
               style={{
                 boxShadow:
                   hoveredIndex === index
@@ -104,7 +115,7 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
                 alt={artist.name}
                 fill
                 className="object-cover transition-all duration-500 group-hover:scale-105"
-                sizes="280px"
+                sizes="300px"
                 style={{
                   filter:
                     hoveredIndex === index
