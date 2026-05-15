@@ -158,14 +158,6 @@ export default async function ArtistPage({
               </div>
             )}
 
-            {/* Info grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20">
-              <Stat label="Location" value={artist.locations[0]?.name || '—'} />
-              <Stat label="Genres" value={String(artist.genres.length)} />
-              <Stat label="Tracks" value={String(tracks.length)} />
-              <Stat label="Status" value={artist.featured_artist ? 'Featured' : 'Active'} highlight />
-            </div>
-
             {/* Socials */}
             <div className="border-t pt-12" style={{ borderColor: '#1a1a1a' }}>
               <h3 className="font-mono text-xs tracking-widest uppercase mb-6" style={{ color: '#666' }}>
@@ -184,17 +176,6 @@ export default async function ArtistPage({
       </main>
 
       <Footer />
-    </div>
-  )
-}
-
-function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
-  return (
-    <div className="p-6 border" style={{ borderColor: '#1a1a1a', background: '#080808' }}>
-      <p className="font-mono text-[10px] uppercase tracking-wider mb-2" style={{ color: '#444' }}>
-        {label}
-      </p>
-      <p className="font-bold" style={{ color: highlight ? '#4E7DFE' : '#fff' }}>{value}</p>
     </div>
   )
 }
