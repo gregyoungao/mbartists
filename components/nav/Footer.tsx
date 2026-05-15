@@ -14,19 +14,19 @@ export default function Footer() {
       className="relative overflow-hidden border-t"
       style={{ background: FOOTER_BG, borderColor: "#1a1a1a" }}
     >
-      {/* Watermark — large MB logo, centered, faded, partially cropped */}
+      {/* Watermark — large MB logo, anchored to the left, faded, partially cropped */}
       <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        className="absolute inset-y-0 left-0 flex items-center pointer-events-none"
         aria-hidden="true"
       >
         <div
           className="relative"
           style={{
-            width: "min(900px, 110%)",
+            width: "min(700px, 80vw)",
             aspectRatio: "1864 / 1356",
-            opacity: 0.06,
-            // Push it down so the bottom is cropped (matches Figma)
-            transform: "translateY(15%)",
+            opacity: 0.08,
+            // Slide left so it bleeds off the edge, and down so bottom crops
+            transform: "translate(-15%, 10%)",
           }}
         >
           <Image
@@ -34,7 +34,7 @@ export default function Footer() {
             alt=""
             fill
             className="object-contain"
-            sizes="900px"
+            sizes="700px"
             priority={false}
           />
         </div>
