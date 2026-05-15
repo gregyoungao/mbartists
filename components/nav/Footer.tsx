@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 
 const ACCENT = "#4E7DFE"
 const FOOTER_BG = "#272727"
@@ -10,10 +11,37 @@ export default function Footer() {
 
   return (
     <footer
-      className="relative border-t"
+      className="relative overflow-hidden border-t"
       style={{ background: FOOTER_BG, borderColor: "#1a1a1a" }}
     >
-      <div className="px-6 md:px-12 py-12 max-w-7xl mx-auto">
+      {/* Watermark — large MB logo, centered, faded, partially cropped */}
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        aria-hidden="true"
+      >
+        <div
+          className="relative"
+          style={{
+            width: "min(900px, 110%)",
+            aspectRatio: "1864 / 1356",
+            opacity: 0.06,
+            // Push it down so the bottom is cropped (matches Figma)
+            transform: "translateY(15%)",
+          }}
+        >
+          <Image
+            src="/images/mb-logo.png"
+            alt=""
+            fill
+            className="object-contain"
+            sizes="900px"
+            priority={false}
+          />
+        </div>
+      </div>
+
+      {/* Content layer — sits on top of watermark */}
+      <div className="relative z-10 px-6 md:px-12 py-12 max-w-7xl mx-auto">
         {/* Contact + Follow row — centered, on top */}
         <div className="flex flex-col items-center gap-8 mb-12">
           <div className="text-center">
