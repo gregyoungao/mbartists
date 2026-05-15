@@ -1,5 +1,6 @@
 // =========================================================
 // /book — public "Book An Artist" page (light theme)
+// Reads ?artist=<id> query param and pre-fills the artist in the form.
 // =========================================================
 
 import Navigation from '@/components/nav/Navigation'
@@ -19,8 +20,18 @@ async function getArtists() {
   return data || []
 }
 
-export default async function BookPage() {
+export default async function BookPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ artist?: string }>
+}) {
+  const params = await searchParams
   const artists = await getArtists()
+
+  // If ?artist=<id> is provided, find that artist (so we can pass the name)
+  const lockedArtist = params.artist
+    ? artists.find((a) => a.id === params.artist)
+    : null
 
   return (
     <main className="min-h-screen" style={{ background: '#ffffff', color: '#0a0a0a' }}>
@@ -44,7 +55,9 @@ export default async function BookPage() {
                 Book An Artist
               </h1>
               <p className="text-lg mb-12" style={{ color: '#666' }}>
-                You&apos;re one step closer to an unforgettable moment.
+                {lockedArtist
+                  ? `You're enquiring about ${lockedArtist.name}. Fill in the details below.`
+                  : "You're one step closer to an unforgettable moment."}
               </p>
 
               <div className="space-y-8">
@@ -113,9 +126,14 @@ export default async function BookPage() {
               </div>
             </div>
 
-            {/* Right column — the form (light theme) */}
+            {/* Right column — the form (light theme, optionally pre-locked to one artist) */}
             <div>
-              <EnquiryForm artists={artists} theme="light" />
+              <EnquiryForm
+                artists={artists}
+                theme="light"
+                lockedArtistId={lockedArtist?.id}
+                lockedArtistName={lockedArtist?.name}
+              />
             </div>
           </div>
         </div>

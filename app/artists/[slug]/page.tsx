@@ -1,7 +1,8 @@
 // =========================================================
 // app/artists/[slug]/page.tsx
 // Server component — fetches artist from Supabase.
-// Step 6 update: adds an embedded booking enquiry form.
+// Step 6 enquiry form replaced with a "Make an Enquiry" CTA
+// linking to /book?artist=<id> (artist auto-selected).
 // =========================================================
 
 import { notFound } from 'next/navigation'
@@ -10,20 +11,17 @@ import Link from 'next/link'
 import Navigation from '@/components/nav/Navigation'
 import Footer from '@/components/nav/Footer'
 import FeaturedTracks from '@/components/tracks/FeaturedTracks'
-import EnquiryForm from '@/components/enquiry/EnquiryForm'
 import {
   getAllArtists,
   getArtistBySlug,
   getArtistSpotlights,
 } from '@/lib/supabase'
 
-// Pre-render all published artist pages at build time
 export async function generateStaticParams() {
   const artists = await getAllArtists()
   return artists.map((a) => ({ slug: a.slug }))
 }
 
-// Re-fetch every 60s so newly approved artists appear without redeploy
 export const revalidate = 60
 
 export default async function ArtistPage({
@@ -115,24 +113,37 @@ export default async function ArtistPage({
                   <h2 className="font-mono text-xs tracking-widest uppercase mb-6" style={{ color: '#4E7DFE' }}>
                     {'// Agent'}
                   </h2>
-                  <Link
-                    href={`/agents/${artist.primary_agent.slug}`}
-                    className="block p-6 border transition-all duration-300 group"
+                  <div
+                    className="p-6 border"
                     style={{ borderColor: '#222', background: '#0a0a0a' }}
                   >
-                    <p className="font-bold text-lg mb-1 group-hover:text-[#4E7DFE] transition-colors">
-                      {artist.primary_agent.name}
-                    </p>
-                    {artist.primary_agent.email && (
-                      <p className="font-mono text-xs" style={{ color: '#666' }}>
-                        {artist.primary_agent.email}
+                    <Link
+                      href={`/agents/${artist.primary_agent.slug}`}
+                      className="block group"
+                    >
+                      <p className="font-bold text-lg mb-1 group-hover:text-[#4E7DFE] transition-colors">
+                        {artist.primary_agent.name}
                       </p>
-                    )}
-                    <div className="mt-4 flex items-center gap-2 font-mono text-xs" style={{ color: '#4E7DFE' }}>
-                      <span>View Profile</span>
-                      <span>{'>'}</span>
-                    </div>
-                  </Link>
+                      {artist.primary_agent.email && (
+                        <p className="font-mono text-xs mb-4" style={{ color: '#666' }}>
+                          {artist.primary_agent.email}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 font-mono text-xs mb-6" style={{ color: '#4E7DFE' }}>
+                        <span>View Profile</span>
+                        <span>{'>'}</span>
+                      </div>
+                    </Link>
+
+                    {/* Make an Enquiry button — pre-fills this artist in the booking form */}
+                    <Link
+                      href={`/book?artist=${artist.id}`}
+                      className="block text-center font-mono text-xs uppercase tracking-widest px-4 py-3 transition-colors"
+                      style={{ background: '#4E7DFE', color: '#000' }}
+                    >
+                      Make an Enquiry
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
@@ -153,24 +164,6 @@ export default async function ArtistPage({
               <Stat label="Genres" value={String(artist.genres.length)} />
               <Stat label="Tracks" value={String(tracks.length)} />
               <Stat label="Status" value={artist.featured_artist ? 'Featured' : 'Active'} highlight />
-            </div>
-
-            {/* Booking enquiry */}
-            <div className="border-t pt-12 mb-20" style={{ borderColor: '#1a1a1a' }}>
-              <h2 className="font-mono text-xs tracking-widest uppercase mb-2" style={{ color: '#4E7DFE' }}>
-                {'// Book ' + artist.name}
-              </h2>
-              <p className="mb-8" style={{ color: '#666' }}>
-                Interested in booking {artist.name}? Send an enquiry and the
-                agent will be in touch.
-              </p>
-              <div className="max-w-3xl">
-                <EnquiryForm
-                  artists={[{ id: artist.id, name: artist.name }]}
-                  lockedArtistId={artist.id}
-                  lockedArtistName={artist.name}
-                />
-              </div>
             </div>
 
             {/* Socials */}
