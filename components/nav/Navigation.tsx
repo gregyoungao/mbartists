@@ -2,15 +2,17 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
-  { href: "/artists", label: "Artists" },
-  { href: "/agents", label: "Agents" },
-  { href: "/book", label: "Book an Artist" },
-  { href: "/contact", label: "Contact" },
+  { href: "/artists", label: "Our Roster" },
+  { href: "/agents", label: "Our Team" },
+  { href: "/book", label: "Make An Enquiry" },
 ]
+
+const ACCENT = "#4E7DFE"
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -31,52 +33,41 @@ export default function Navigation() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50">
-      {/* Header bar */}
+      {/* Header bar — 3 columns: logo / menu toggle / enquiry */}
       <div
-        className="flex items-center justify-between px-6 md:px-12 py-5 transition-colors duration-300"
+        className="relative grid grid-cols-[1fr_auto_1fr] items-center px-6 md:px-12 py-4 transition-colors duration-300"
         style={{
           background: isOpen ? "#000" : "rgba(0,0,0,0.8)",
           backdropFilter: isOpen ? "none" : "blur(12px)",
-          borderBottom: `1px solid ${isOpen ? "#1a1a1a" : "rgba(255,255,255,0.05)"}`,
+          borderBottom: `1px solid ${
+            isOpen ? "#1a1a1a" : "rgba(255,255,255,0.05)"
+          }`,
         }}
       >
-        <Link
-          href="/"
-          className="font-mono text-xs tracking-widest uppercase transition-colors duration-200 hover:opacity-80"
-          style={{ color: "#4E7DFE" }}
-        >
-          MB Artists
-        </Link>
-
-        <div className="flex items-center gap-4 md:gap-6">
-          {/* Make an Enquiry button */}
+        {/* Left — logo */}
+        <div className="flex justify-start">
           <Link
-            href="/book"
-            className="font-mono text-xs tracking-widest uppercase px-4 py-2 border transition-all duration-200"
-            style={{
-              borderColor: "#4E7DFE",
-              color: pathname === "/book" ? "#000" : "#4E7DFE",
-              background: pathname === "/book" ? "#4E7DFE" : "transparent",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#4E7DFE"
-              e.currentTarget.style.color = "#000"
-            }}
-            onMouseLeave={(e) => {
-              if (pathname !== "/book") {
-                e.currentTarget.style.background = "transparent"
-                e.currentTarget.style.color = "#4E7DFE"
-              }
-            }}
+            href="/"
+            className="inline-block transition-opacity duration-200 hover:opacity-80"
+            aria-label="MB Artists home"
           >
-            Make an Enquiry
+            <Image
+              src="/images/mb-logo.png"
+              alt="MB Artists"
+              width={56}
+              height={40}
+              priority
+              className="h-8 md:h-10 w-auto"
+            />
           </Link>
+        </div>
 
-          {/* Menu toggle button */}
+        {/* Center — menu toggle */}
+        <div className="flex justify-center">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="flex items-center gap-3 font-mono text-xs tracking-widest uppercase transition-colors duration-200"
-            style={{ color: isOpen ? "#4E7DFE" : "#fff" }}
+            style={{ color: isOpen ? ACCENT : "#fff" }}
             aria-expanded={isOpen}
             aria-label={isOpen ? "Close menu" : "Open menu"}
           >
@@ -85,26 +76,55 @@ export default function Navigation() {
               <span
                 className="block w-full h-[1.5px] transition-all duration-300 origin-center"
                 style={{
-                  background: isOpen ? "#4E7DFE" : "#fff",
-                  transform: isOpen ? "translateY(5.25px) rotate(45deg)" : "none",
+                  background: isOpen ? ACCENT : "#fff",
+                  transform: isOpen
+                    ? "translateY(5.25px) rotate(45deg)"
+                    : "none",
                 }}
               />
               <span
                 className="block w-full h-[1.5px] transition-all duration-300"
                 style={{
-                  background: isOpen ? "#4E7DFE" : "#fff",
+                  background: isOpen ? ACCENT : "#fff",
                   opacity: isOpen ? 0 : 1,
                 }}
               />
               <span
                 className="block w-full h-[1.5px] transition-all duration-300 origin-center"
                 style={{
-                  background: isOpen ? "#4E7DFE" : "#fff",
-                  transform: isOpen ? "translateY(-5.25px) rotate(-45deg)" : "none",
+                  background: isOpen ? ACCENT : "#fff",
+                  transform: isOpen
+                    ? "translateY(-5.25px) rotate(-45deg)"
+                    : "none",
                 }}
               />
             </div>
           </button>
+        </div>
+
+        {/* Right — Make an Enquiry */}
+        <div className="flex justify-end">
+          <Link
+            href="/book"
+            className="font-mono text-[10px] md:text-xs tracking-widest uppercase px-3 md:px-4 py-2 border transition-all duration-200 whitespace-nowrap"
+            style={{
+              borderColor: ACCENT,
+              color: pathname === "/book" ? "#000" : ACCENT,
+              background: pathname === "/book" ? ACCENT : "transparent",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = ACCENT
+              e.currentTarget.style.color = "#000"
+            }}
+            onMouseLeave={(e) => {
+              if (pathname !== "/book") {
+                e.currentTarget.style.background = "transparent"
+                e.currentTarget.style.color = ACCENT
+              }
+            }}
+          >
+            Make an Enquiry
+          </Link>
         </div>
       </div>
 
@@ -134,7 +154,9 @@ export default function Navigation() {
                       key={item.href}
                       className="overflow-hidden"
                       style={{
-                        transform: isOpen ? "translateY(0)" : "translateY(20px)",
+                        transform: isOpen
+                          ? "translateY(0)"
+                          : "translateY(20px)",
                         opacity: isOpen ? 1 : 0,
                         transition: `all 0.4s ease-out ${index * 0.05 + 0.1}s`,
                       }}
@@ -142,14 +164,16 @@ export default function Navigation() {
                       <Link
                         href={item.href}
                         className="group flex items-center gap-4 text-2xl md:text-3xl font-bold transition-colors duration-200"
-                        style={{ color: isActive ? "#4E7DFE" : "#fff" }}
+                        style={{ color: isActive ? ACCENT : "#fff" }}
                       >
                         <span
                           className="font-mono text-xs transition-all duration-200"
                           style={{
-                            color: "#4E7DFE",
+                            color: ACCENT,
                             opacity: isActive ? 1 : 0,
-                            transform: isActive ? "translateX(0)" : "translateX(-10px)",
+                            transform: isActive
+                              ? "translateX(0)"
+                              : "translateX(-10px)",
                           }}
                         >
                           {">"}
@@ -181,11 +205,11 @@ export default function Navigation() {
                 }}
               >
                 <a
-                  href="mailto:info@mbartists.co.uk"
+                  href="mailto:support@mbartists.com"
                   className="block font-mono text-sm transition-colors duration-200 hover:text-[#4E7DFE]"
                   style={{ color: "#888" }}
                 >
-                  info@mbartists.co.uk
+                  support@mbartists.com
                 </a>
                 <p className="font-mono text-sm" style={{ color: "#444" }}>
                   London, UK
@@ -219,13 +243,22 @@ export default function Navigation() {
                   Instagram
                 </a>
                 <a
-                  href="https://linkedin.com/company/mbartists"
+                  href="https://facebook.com/mbartists"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-mono text-xs uppercase tracking-wider transition-colors duration-200 hover:text-[#4E7DFE]"
                   style={{ color: "#888" }}
                 >
-                  LinkedIn
+                  Facebook
+                </a>
+                <a
+                  href="https://twitter.com/mbartists"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-xs uppercase tracking-wider transition-colors duration-200 hover:text-[#4E7DFE]"
+                  style={{ color: "#888" }}
+                >
+                  Twitter
                 </a>
               </div>
             </div>
@@ -241,10 +274,13 @@ export default function Navigation() {
               transition: "all 0.4s ease-out 0.3s",
             }}
           >
-            <p className="font-mono text-[10px] uppercase tracking-wider" style={{ color: "#333" }}>
+            <p
+              className="font-mono text-[10px] uppercase tracking-wider"
+              style={{ color: "#333" }}
+            >
               Artist Management Agency
             </p>
-            <p className="font-mono text-[10px]" style={{ color: "#4E7DFE" }}>
+            <p className="font-mono text-[10px]" style={{ color: ACCENT }}>
               Est. 2024
             </p>
           </div>
