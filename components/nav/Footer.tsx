@@ -12,31 +12,12 @@ export default function Footer() {
       className="relative border-t"
       style={{ background: "#000", borderColor: "#1a1a1a" }}
     >
-      <div className="px-6 md:px-12 py-16 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
-          {/* Logo / brand block */}
-          <div>
-            <Link
-              href="/"
-              className="inline-block font-mono text-xs tracking-widest uppercase mb-4 transition-colors hover:opacity-80"
-              style={{ color: ACCENT }}
-            >
-              MB Artists
-            </Link>
+      <div className="px-6 md:px-12 py-12 max-w-7xl mx-auto">
+        {/* Contact + Follow row — centered, on top */}
+        <div className="flex flex-col items-center gap-8 mb-12">
+          <div className="text-center">
             <p
-              className="font-mono text-xs leading-relaxed"
-              style={{ color: "#444" }}
-            >
-              Artist Management Agency
-              <br />
-              London, UK
-            </p>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <p
-              className="font-mono text-[10px] tracking-widest uppercase mb-3"
+              className="font-mono text-[10px] tracking-widest uppercase mb-2"
               style={{ color: ACCENT }}
             >
               Contact Us
@@ -48,34 +29,16 @@ export default function Footer() {
             >
               SUPPORT@MBARTISTS.COM
             </a>
-            <div className="mt-4">
-              <Link
-                href="/book"
-                className="font-mono text-xs uppercase tracking-widest px-4 py-2 border inline-block transition-all duration-200"
-                style={{ borderColor: ACCENT, color: ACCENT }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = ACCENT
-                  e.currentTarget.style.color = "#000"
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent"
-                  e.currentTarget.style.color = ACCENT
-                }}
-              >
-                Make an Enquiry
-              </Link>
-            </div>
           </div>
 
-          {/* Follow */}
-          <div>
+          <div className="text-center">
             <p
               className="font-mono text-[10px] tracking-widest uppercase mb-3"
               style={{ color: ACCENT }}
             >
               Follow Us
             </p>
-            <div className="flex gap-5">
+            <div className="flex gap-5 justify-center">
               <a
                 href="https://facebook.com"
                 target="_blank"
@@ -137,28 +100,28 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar */}
+        {/* Bottom bar — copyright | privacy | designed by */}
         <div
-          className="pt-8 border-t flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+          className="pt-6 border-t flex flex-col md:flex-row items-center justify-between gap-4"
           style={{ borderColor: "#1a1a1a" }}
         >
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <p
-              className="font-mono text-[10px] uppercase tracking-wider"
-              style={{ color: "#444" }}
-            >
-              All Rights Reserved MB Artists Ltd {year}
-            </p>
-            <Link
-              href="#"
-              className="font-mono text-[10px] uppercase tracking-wider transition-colors hover:text-[#4E7DFE]"
-              style={{ color: "#444" }}
-            >
-              Privacy Policy
-            </Link>
-          </div>
           <p
-            className="font-mono text-[10px] uppercase tracking-wider"
+            className="font-mono text-[10px] uppercase tracking-wider order-2 md:order-1"
+            style={{ color: "#444" }}
+          >
+            All Rights Reserved MB Artists Ltd {year}
+          </p>
+
+          <Link
+            href="#"
+            className="font-mono text-[10px] uppercase tracking-wider transition-colors hover:text-[#4E7DFE] order-1 md:order-2"
+            style={{ color: "#444" }}
+          >
+            Privacy Policy
+          </Link>
+
+          <p
+            className="font-mono text-[10px] uppercase tracking-wider order-3"
             style={{ color: "#444" }}
           >
             Designed by{" "}

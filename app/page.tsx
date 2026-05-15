@@ -1,6 +1,6 @@
 // =========================================================
 // Homepage — Hero + Featured Roster + Building Careers
-// + Artists Worldwide (map) + Footer
+// + Artists Worldwide (map with own heading) + Footer
 // =========================================================
 
 import HeroSection from '@/components/hero/HeroSection'
@@ -61,32 +61,7 @@ export default async function Page() {
       <HeroSection />
       <FeaturedRoster artists={featuredArtists} />
       <BuildingCareers />
-
-      {/* Artists Worldwide — wraps existing ArtistMap with a heading */}
-      <section className="relative py-20 md:py-28" style={{ background: '#000' }}>
-        <div className="px-6 md:px-12 mb-12 text-center">
-          <p
-            className="font-mono text-xs tracking-widest uppercase mb-3"
-            style={{ color: '#4E7DFE' }}
-          >
-            {'// Global Reach'}
-          </p>
-          <h2
-            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4"
-            style={{ color: '#fff' }}
-          >
-            Artists Worldwide
-          </h2>
-          <p
-            className="font-mono text-xs tracking-wider"
-            style={{ color: '#666' }}
-          >
-            Brighter regions indicate more artists — hover to explore
-          </p>
-        </div>
-        <ArtistMap />
-      </section>
-
+      <ArtistMap />
       <Footer />
     </main>
   )

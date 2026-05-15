@@ -21,27 +21,8 @@ const ACCENT = "#4E7DFE"
 
 export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(true)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [isPaused, setIsPaused] = useState(false)
-
-  const checkScroll = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
-      setCanScrollLeft(scrollLeft > 0)
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10)
-    }
-  }
-
-  useEffect(() => {
-    checkScroll()
-    const el = scrollRef.current
-    if (el) {
-      el.addEventListener("scroll", checkScroll)
-      return () => el.removeEventListener("scroll", checkScroll)
-    }
-  }, [])
 
   // Auto-slider — advances every 3s, pauses on hover, loops back
   useEffect(() => {
@@ -63,16 +44,6 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
 
     return () => clearInterval(interval)
   }, [isPaused, artists.length])
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const scrollAmount = 400
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      })
-    }
-  }
 
   if (artists.length === 0) {
     return null
@@ -239,68 +210,21 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
           roster.
         </p>
 
-        <div className="flex items-center justify-center gap-3">
-          {/* Mobile-friendly arrow controls */}
-          <button
-            onClick={() => scroll("left")}
-            disabled={!canScrollLeft}
-            className="w-10 h-10 flex items-center justify-center border transition-all duration-200"
-            style={{
-              borderColor: canScrollLeft ? INK : "#bbb",
-              color: canScrollLeft ? INK : "#bbb",
-              cursor: canScrollLeft ? "pointer" : "not-allowed",
-            }}
-            aria-label="Scroll left"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M10 12L6 8L10 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-
-          <Link
-            href="/artists"
-            className="font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200"
-            style={{ background: INK, color: BG }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = ACCENT
-              e.currentTarget.style.color = "#000"
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = INK
-              e.currentTarget.style.color = BG
-            }}
-          >
-            See All Artists
-          </Link>
-
-          <button
-            onClick={() => scroll("right")}
-            disabled={!canScrollRight}
-            className="w-10 h-10 flex items-center justify-center border transition-all duration-200"
-            style={{
-              borderColor: canScrollRight ? INK : "#bbb",
-              color: canScrollRight ? INK : "#bbb",
-              cursor: canScrollRight ? "pointer" : "not-allowed",
-            }}
-            aria-label="Scroll right"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M6 4L10 8L6 12"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
+        <Link
+          href="/artists"
+          className="inline-block font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200"
+          style={{ background: INK, color: BG }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = ACCENT
+            e.currentTarget.style.color = "#000"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = INK
+            e.currentTarget.style.color = BG
+          }}
+        >
+          See All Artists
+        </Link>
       </div>
     </section>
   )
