@@ -31,7 +31,6 @@ const GAP = 16
 
 export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [isPaused, setIsPaused] = useState(false)
 
   if (artists.length === 0) {
     return null
@@ -42,15 +41,16 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
   // when it loops, the second set is already in view, so there's no visible reset.
   const loopedArtists = [...artists, ...artists]
 
-  // Pace: ~3s per card so longer rosters scroll proportionally
-  const durationSec = Math.max(20, artists.length * 3)
+  // Slower pace: ~5s per card width, with a 35s floor for short rosters
+  const durationSec = Math.max(35, artists.length * 5)
+
+  // Animation pauses only when a specific card is hovered, not the whole section
+  const isPaused = hoveredIndex !== null
 
   return (
     <section
       className={`relative py-20 md:py-28 overflow-hidden ${golos.className}`}
       style={{ background: BG }}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
     >
       {/* Keyframes for the infinite scroll — defined inline so the file is self-contained */}
       <style>{`
@@ -119,13 +119,13 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
                   }}
                 />
 
-                {/* Overlay gradient */}
+                {/* Overlay gradient — only when hovered, to make name readable */}
                 <div
                   className="absolute inset-0 transition-opacity duration-300"
                   style={{
                     background:
-                      "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%)",
-                    opacity: hoveredIndex === index ? 1 : 0.5,
+                      "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%)",
+                    opacity: hoveredIndex === index ? 1 : 0,
                   }}
                 />
 
@@ -175,30 +175,17 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
                   }}
                 />
 
-                {/* Artist info at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 p-4">
+                {/* Artist name — only visible on hover, fades in/out */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 p-4 transition-opacity duration-300"
+                  style={{ opacity: hoveredIndex === index ? 1 : 0 }}
+                >
                   <h3
-                    className="font-bold text-lg mb-1 transition-colors duration-300"
-                    style={{
-                      color: hoveredIndex === index ? ACCENT : "#fff",
-                    }}
+                    className="font-bold text-lg"
+                    style={{ color: "#fff" }}
                   >
                     {artist.name}
                   </h3>
-                  <div className="flex flex-wrap gap-1">
-                    {artist.genres.slice(0, 2).map((genre) => (
-                      <span
-                        key={genre}
-                        className="font-mono text-[10px] px-2 py-0.5 uppercase tracking-wider"
-                        style={{
-                          background: "rgba(78, 125, 254, 0.2)",
-                          color: ACCENT,
-                        }}
-                      >
-                        {genre}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               </div>
             </Link>
