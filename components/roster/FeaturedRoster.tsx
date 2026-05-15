@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Golos_Text } from "next/font/google"
@@ -23,50 +23,43 @@ interface FeaturedRosterProps {
   artists: FeaturedArtist[]
 }
 
-const BG = "#EEE9E1"
+const BG = "#d9d9d9"
 const INK = "#0a0a0a"
 const ACCENT = "#4E7DFE"
-
-// Card dimensions — 300x400 (3:4 portrait)
 const CARD_WIDTH = 300
+const GAP = 16
 
 export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
-  const scrollRef = useRef<HTMLDivElement>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [isPaused, setIsPaused] = useState(false)
-
-  // Auto-slider — advances every 3s, pauses on hover, loops back
-  useEffect(() => {
-    if (isPaused || artists.length === 0) return
-
-    const interval = setInterval(() => {
-      const el = scrollRef.current
-      if (!el) return
-
-      const { scrollLeft, scrollWidth, clientWidth } = el
-      const atEnd = scrollLeft >= scrollWidth - clientWidth - 10
-
-      if (atEnd) {
-        el.scrollTo({ left: 0, behavior: "smooth" })
-      } else {
-        el.scrollBy({ left: CARD_WIDTH + 16, behavior: "smooth" })
-      }
-    }, 3000)
-
-    return () => clearInterval(interval)
-  }, [isPaused, artists.length])
 
   if (artists.length === 0) {
     return null
   }
 
+  // Duplicate the list so the scroll wraps seamlessly (no jump back to start).
+  // The CSS animation moves the track by exactly the width of ONE full set;
+  // when it loops, the second set is already in view, so there's no visible reset.
+  const loopedArtists = [...artists, ...artists]
+
+  // Pace: ~3s per card so longer rosters scroll proportionally
+  const durationSec = Math.max(20, artists.length * 3)
+
   return (
     <section
-      className={`relative py-20 md:py-28 ${golos.className}`}
+      className={`relative py-20 md:py-28 overflow-hidden ${golos.className}`}
       style={{ background: BG }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
+      {/* Keyframes for the infinite scroll — defined inline so the file is self-contained */}
+      <style>{`
+        @keyframes mb-roster-scroll {
+          from { transform: translateX(0); }
+          to   { transform: translateX(calc(-50% - ${GAP / 2}px)); }
+        }
+      `}</style>
+
       {/* Section header — centered */}
       <div className="px-6 md:px-12 mb-12 text-center">
         <p
@@ -83,131 +76,134 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
         </h2>
       </div>
 
-      {/* Scrollable artist cards */}
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide px-6 md:px-12 pb-4"
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-      >
-        {artists.map((artist, index) => (
-          <Link
-            key={artist.slug}
-            href={`/artists/${artist.slug}`}
-            className="group relative flex-shrink-0 overflow-hidden"
-            style={{ width: `${CARD_WIDTH}px` }}
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
-            <div
-              className="relative aspect-[3/4] overflow-hidden transition-all duration-300"
-              style={{
-                boxShadow:
-                  hoveredIndex === index
-                    ? "0 0 30px rgba(78, 125, 254, 0.3)"
-                    : "none",
-              }}
+      {/* Track — duplicated list, animated horizontally. Centered on wide screens via max-w-7xl + mx-auto. */}
+      <div className="overflow-hidden max-w-7xl mx-auto">
+        <div
+          className="flex"
+          style={{
+            gap: `${GAP}px`,
+            width: "max-content",
+            animation: `mb-roster-scroll ${durationSec}s linear infinite`,
+            animationPlayState: isPaused ? "paused" : "running",
+          }}
+        >
+          {loopedArtists.map((artist, index) => (
+            <Link
+              key={`${artist.slug}-${index}`}
+              href={`/artists/${artist.slug}`}
+              className="group relative flex-shrink-0 overflow-hidden"
+              style={{ width: `${CARD_WIDTH}px` }}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
             >
-              <Image
-                src={artist.image}
-                alt={artist.name}
-                fill
-                className="object-cover transition-all duration-500 group-hover:scale-105"
-                sizes="300px"
+              <div
+                className="relative aspect-[3/4] overflow-hidden transition-all duration-300"
                 style={{
-                  filter:
+                  boxShadow:
                     hoveredIndex === index
-                      ? "grayscale(0%)"
-                      : "grayscale(100%)",
+                      ? "0 0 30px rgba(78, 125, 254, 0.3)"
+                      : "none",
                 }}
-              />
-
-              {/* Overlay gradient */}
-              <div
-                className="absolute inset-0 transition-opacity duration-300"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%)",
-                  opacity: hoveredIndex === index ? 1 : 0.5,
-                }}
-              />
-
-              {/* Corner accents on hover */}
-              <div
-                className="absolute top-3 left-3 w-4 h-4 transition-all duration-300"
-                style={{
-                  borderTop: `2px solid ${
-                    hoveredIndex === index ? ACCENT : "transparent"
-                  }`,
-                  borderLeft: `2px solid ${
-                    hoveredIndex === index ? ACCENT : "transparent"
-                  }`,
-                }}
-              />
-              <div
-                className="absolute top-3 right-3 w-4 h-4 transition-all duration-300"
-                style={{
-                  borderTop: `2px solid ${
-                    hoveredIndex === index ? ACCENT : "transparent"
-                  }`,
-                  borderRight: `2px solid ${
-                    hoveredIndex === index ? ACCENT : "transparent"
-                  }`,
-                }}
-              />
-              <div
-                className="absolute bottom-3 left-3 w-4 h-4 transition-all duration-300"
-                style={{
-                  borderBottom: `2px solid ${
-                    hoveredIndex === index ? ACCENT : "transparent"
-                  }`,
-                  borderLeft: `2px solid ${
-                    hoveredIndex === index ? ACCENT : "transparent"
-                  }`,
-                }}
-              />
-              <div
-                className="absolute bottom-3 right-3 w-4 h-4 transition-all duration-300"
-                style={{
-                  borderBottom: `2px solid ${
-                    hoveredIndex === index ? ACCENT : "transparent"
-                  }`,
-                  borderRight: `2px solid ${
-                    hoveredIndex === index ? ACCENT : "transparent"
-                  }`,
-                }}
-              />
-
-              {/* Artist info at bottom */}
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h3
-                  className="font-bold text-lg mb-1 transition-colors duration-300"
+              >
+                <Image
+                  src={artist.image}
+                  alt={artist.name}
+                  fill
+                  className="object-cover transition-all duration-500 group-hover:scale-105"
+                  sizes="300px"
                   style={{
-                    color: hoveredIndex === index ? ACCENT : "#fff",
+                    filter:
+                      hoveredIndex === index
+                        ? "grayscale(0%)"
+                        : "grayscale(100%)",
                   }}
-                >
-                  {artist.name}
-                </h3>
-                <div className="flex flex-wrap gap-1">
-                  {artist.genres.slice(0, 2).map((genre) => (
-                    <span
-                      key={genre}
-                      className="font-mono text-[10px] px-2 py-0.5 uppercase tracking-wider"
-                      style={{
-                        background: "rgba(78, 125, 254, 0.2)",
-                        color: ACCENT,
-                      }}
-                    >
-                      {genre}
-                    </span>
-                  ))}
+                />
+
+                {/* Overlay gradient */}
+                <div
+                  className="absolute inset-0 transition-opacity duration-300"
+                  style={{
+                    background:
+                      "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%)",
+                    opacity: hoveredIndex === index ? 1 : 0.5,
+                  }}
+                />
+
+                {/* Corner accents on hover */}
+                <div
+                  className="absolute top-3 left-3 w-4 h-4 transition-all duration-300"
+                  style={{
+                    borderTop: `2px solid ${
+                      hoveredIndex === index ? ACCENT : "transparent"
+                    }`,
+                    borderLeft: `2px solid ${
+                      hoveredIndex === index ? ACCENT : "transparent"
+                    }`,
+                  }}
+                />
+                <div
+                  className="absolute top-3 right-3 w-4 h-4 transition-all duration-300"
+                  style={{
+                    borderTop: `2px solid ${
+                      hoveredIndex === index ? ACCENT : "transparent"
+                    }`,
+                    borderRight: `2px solid ${
+                      hoveredIndex === index ? ACCENT : "transparent"
+                    }`,
+                  }}
+                />
+                <div
+                  className="absolute bottom-3 left-3 w-4 h-4 transition-all duration-300"
+                  style={{
+                    borderBottom: `2px solid ${
+                      hoveredIndex === index ? ACCENT : "transparent"
+                    }`,
+                    borderLeft: `2px solid ${
+                      hoveredIndex === index ? ACCENT : "transparent"
+                    }`,
+                  }}
+                />
+                <div
+                  className="absolute bottom-3 right-3 w-4 h-4 transition-all duration-300"
+                  style={{
+                    borderBottom: `2px solid ${
+                      hoveredIndex === index ? ACCENT : "transparent"
+                    }`,
+                    borderRight: `2px solid ${
+                      hoveredIndex === index ? ACCENT : "transparent"
+                    }`,
+                  }}
+                />
+
+                {/* Artist info at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h3
+                    className="font-bold text-lg mb-1 transition-colors duration-300"
+                    style={{
+                      color: hoveredIndex === index ? ACCENT : "#fff",
+                    }}
+                  >
+                    {artist.name}
+                  </h3>
+                  <div className="flex flex-wrap gap-1">
+                    {artist.genres.slice(0, 2).map((genre) => (
+                      <span
+                        key={genre}
+                        className="font-mono text-[10px] px-2 py-0.5 uppercase tracking-wider"
+                        style={{
+                          background: "rgba(78, 125, 254, 0.2)",
+                          color: ACCENT,
+                        }}
+                      >
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* Tagline + CTA — centered below the row */}
