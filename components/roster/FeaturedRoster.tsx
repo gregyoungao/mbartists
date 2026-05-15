@@ -222,20 +222,20 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
         </p>
 
         <Link
-          href="/artists"
-          className="inline-block font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200"
-          style={{ background: INK, color: BG }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = ACCENT
-            e.currentTarget.style.color = "#000"
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = INK
-            e.currentTarget.style.color = BG
-          }}
-        >
-          See All Artists
-        </Link>
+  href="/artists"
+  className="inline-block font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200"
+  style={{ background: INK, color: BG }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.background = ACCENT
+    e.currentTarget.style.color = "#000"
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.background = INK
+    e.currentTarget.style.color = BG
+  }}
+>
+  See All Artists
+</Link>
       </div>
     </section>
   )
