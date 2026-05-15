@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import Navigation from '@/components/nav/Navigation'
+import Footer from '@/components/nav/Footer'
 import FeaturedTracks from '@/components/tracks/FeaturedTracks'
 import EnquiryForm from '@/components/enquiry/EnquiryForm'
 import {
@@ -188,6 +189,8 @@ export default async function ArtistPage({
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   )
 }

@@ -1,11 +1,14 @@
 // =========================================================
-// Homepage — fetches 10 random featured artists from Supabase
+// Homepage — Hero + Featured Roster + Building Careers
+// + Artists Worldwide (map) + Footer
 // =========================================================
 
 import HeroSection from '@/components/hero/HeroSection'
 import ArtistMap from '@/components/map/ArtistMap'
 import Navigation from '@/components/nav/Navigation'
+import Footer from '@/components/nav/Footer'
 import FeaturedRoster from '@/components/roster/FeaturedRoster'
+import BuildingCareers from '@/components/sections/BuildingCareers'
 import { getServiceClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -20,7 +23,6 @@ interface FeaturedArtist {
 async function getFeaturedArtists(): Promise<FeaturedArtist[]> {
   const supabase = getServiceClient()
 
-  // Get all non-archived, featured artists with their genres
   const { data, error } = await supabase
     .from('artists')
     .select(`
@@ -32,7 +34,6 @@ async function getFeaturedArtists(): Promise<FeaturedArtist[]> {
 
   if (error || !data) return []
 
-  // Map to the shape FeaturedRoster expects
   const mapped: FeaturedArtist[] = data.map((a: any) => ({
     slug: a.slug,
     name: a.name,
@@ -42,7 +43,7 @@ async function getFeaturedArtists(): Promise<FeaturedArtist[]> {
       .filter(Boolean),
   }))
 
-  // Shuffle (Fisher-Yates) and take 10
+  // Shuffle and take 10
   for (let i = mapped.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[mapped[i], mapped[j]] = [mapped[j], mapped[i]]
@@ -55,11 +56,38 @@ export default async function Page() {
   const featuredArtists = await getFeaturedArtists()
 
   return (
-    <main>
+    <main className="bg-black">
       <Navigation />
       <HeroSection />
       <FeaturedRoster artists={featuredArtists} />
-      <ArtistMap />
+      <BuildingCareers />
+
+      {/* Artists Worldwide — wraps existing ArtistMap with a heading */}
+      <section className="relative py-20 md:py-28" style={{ background: '#000' }}>
+        <div className="px-6 md:px-12 mb-12 text-center">
+          <p
+            className="font-mono text-xs tracking-widest uppercase mb-3"
+            style={{ color: '#4E7DFE' }}
+          >
+            {'// Global Reach'}
+          </p>
+          <h2
+            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4"
+            style={{ color: '#fff' }}
+          >
+            Artists Worldwide
+          </h2>
+          <p
+            className="font-mono text-xs tracking-wider"
+            style={{ color: '#666' }}
+          >
+            Brighter regions indicate more artists — hover to explore
+          </p>
+        </div>
+        <ArtistMap />
+      </section>
+
+      <Footer />
     </main>
   )
 }

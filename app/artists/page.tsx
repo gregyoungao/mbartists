@@ -5,6 +5,7 @@
 // =========================================================
 
 import Navigation from '@/components/nav/Navigation'
+import Footer from '@/components/nav/Footer'
 import ArtistsView from '@/components/artists/ArtistsView'
 import { getServiceClient } from '@/lib/supabase'
 
@@ -53,6 +54,7 @@ export default async function ArtistsPage() {
     <main className="min-h-screen bg-black text-white">
       <Navigation />
       <ArtistsView artists={artists} />
+      <Footer />
     </main>
   )
 }

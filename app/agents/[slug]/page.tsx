@@ -5,6 +5,7 @@
 
 import { notFound } from 'next/navigation'
 import Navigation from '@/components/nav/Navigation'
+import Footer from '@/components/nav/Footer'
 import AgentDetailView from '@/components/agents/AgentDetailView'
 import { getServiceClient } from '@/lib/supabase'
 import { getRoleLabel } from '@/lib/roles'
@@ -40,7 +41,6 @@ async function getAgent(slug: string): Promise<AgentDetail | null> {
 
   if (!agent) return null
 
-  // Fetch this agent's roster (primary OR secondary), non-archived
   const { data: artists } = await supabase
     .from('artists')
     .select(`
@@ -86,6 +86,7 @@ export default async function AgentPage({
     <div className="min-h-screen bg-black text-white">
       <Navigation />
       <AgentDetailView agent={agent} />
+      <Footer />
     </div>
   )
 }

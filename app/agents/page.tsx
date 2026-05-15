@@ -4,6 +4,7 @@
 // =========================================================
 
 import Navigation from '@/components/nav/Navigation'
+import Footer from '@/components/nav/Footer'
 import AgentsView from '@/components/agents/AgentsView'
 import { getServiceClient } from '@/lib/supabase'
 import { getRoleLabel } from '@/lib/roles'
@@ -62,6 +63,7 @@ export default async function AgentsPage() {
     <main className="min-h-screen bg-black text-white">
       <Navigation />
       <AgentsView agents={agents} />
+      <Footer />
     </main>
   )
 }

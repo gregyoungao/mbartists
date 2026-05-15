@@ -4,6 +4,7 @@
 // =========================================================
 
 import Navigation from '@/components/nav/Navigation'
+import Footer from '@/components/nav/Footer'
 import EnquiryForm from '@/components/enquiry/EnquiryForm'
 import { getServiceClient } from '@/lib/supabase'
 
@@ -108,6 +109,7 @@ export default async function BookPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </main>
   )
 }
