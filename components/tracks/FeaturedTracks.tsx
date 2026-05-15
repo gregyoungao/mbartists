@@ -1,7 +1,7 @@
 // =========================================================
-// FeaturedTracks — 4-column grid of track cards.
-// Fetches oEmbed data server-side to get artwork + real titles
-// for Spotify, SoundCloud, YouTube, and Bandcamp URLs.
+// FeaturedTracks — 4-column grid of inline-playable tracks.
+// Each card has the same height (352px) so the row stays even,
+// regardless of whether the track is on Spotify, SoundCloud, etc.
 // =========================================================
 
 interface Track {
@@ -9,192 +9,176 @@ interface Track {
   title?: string
 }
 
-interface EmbedData {
-  thumbnail: string | null
-  title: string
-  platform: string
-  url: string
+const ACCENT = '#4E7DFE'
+const PLAYER_HEIGHT = 352 // matches Spotify's tall card; keeps row even
+
+function getSpotifyEmbedUrl(url: string): string | null {
+  const match = url.match(
+    /spotify\.com\/(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)/
+  )
+  if (!match) return null
+  return `https://open.spotify.com/embed/${match[1]}/${match[2]}?theme=0`
 }
 
-const ACCENT = '#4E7DFE'
+function getSoundCloudEmbedUrl(url: string): string {
+  const params = new URLSearchParams({
+    url: url,
+    color: ACCENT.replace('#', ''),
+    auto_play: 'false',
+    hide_related: 'true',
+    show_comments: 'false',
+    show_user: 'true',
+    show_reposts: 'false',
+    show_teaser: 'false',
+    visual: 'true', // tall visual player with artwork
+  })
+  return `https://w.soundcloud.com/player/?${params.toString()}`
+}
 
-function detectPlatform(url: string): {
-  platform: string
-  oembedUrl: string | null
-} {
+function getYouTubeEmbedUrl(url: string): string | null {
+  let id: string | null = null
+  const watchMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
+  const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
+  const embedMatch = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/)
+  if (watchMatch) id = watchMatch[1]
+  else if (shortMatch) id = shortMatch[1]
+  else if (embedMatch) id = embedMatch[1]
+  if (!id) return null
+  return `https://www.youtube.com/embed/${id}`
+}
+
+interface EmbedInfo {
+  type: 'spotify' | 'soundcloud' | 'youtube' | 'external'
+  embedUrl: string | null
+}
+
+function getEmbed(url: string): EmbedInfo {
   if (url.includes('spotify.com')) {
-    return {
-      platform: 'Spotify',
-      oembedUrl: `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`,
-    }
+    return { type: 'spotify', embedUrl: getSpotifyEmbedUrl(url) }
   }
   if (url.includes('soundcloud.com')) {
-    return {
-      platform: 'SoundCloud',
-      oembedUrl: `https://soundcloud.com/oembed?url=${encodeURIComponent(
-        url
-      )}&format=json`,
-    }
+    return { type: 'soundcloud', embedUrl: getSoundCloudEmbedUrl(url) }
   }
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
-    return {
-      platform: 'YouTube',
-      oembedUrl: `https://www.youtube.com/oembed?url=${encodeURIComponent(
-        url
-      )}&format=json`,
-    }
+    return { type: 'youtube', embedUrl: getYouTubeEmbedUrl(url) }
   }
-  if (url.includes('bandcamp.com')) {
-    return {
-      platform: 'Bandcamp',
-      oembedUrl: `https://bandcamp.com/oembed?url=${encodeURIComponent(
-        url
-      )}&format=json`,
-    }
-  }
-  return { platform: 'External', oembedUrl: null }
+  return { type: 'external', embedUrl: null }
 }
 
-async function fetchEmbed(track: Track): Promise<EmbedData> {
-  const { url, title } = track
-  const { platform, oembedUrl } = detectPlatform(url)
-
-  if (!oembedUrl) {
-    return { thumbnail: null, title: title || 'Track', platform, url }
-  }
-
-  try {
-    const res = await fetch(oembedUrl, {
-      // Cache for 24 hours — track artwork doesn't change often
-      next: { revalidate: 86400 },
-    })
-    if (!res.ok) throw new Error(`oEmbed ${res.status}`)
-    const data = await res.json()
-    return {
-      thumbnail: data.thumbnail_url || null,
-      title: data.title || title || 'Track',
-      platform,
-      url,
-    }
-  } catch {
-    // Graceful fallback if oEmbed fails (deleted track, network issue, etc.)
-    return { thumbnail: null, title: title || 'Track', platform, url }
-  }
-}
-
-export default async function FeaturedTracks({
-  tracks,
-}: {
-  tracks: Track[]
-}) {
+export default function FeaturedTracks({ tracks }: { tracks: Track[] }) {
   if (!tracks?.length) return null
-
-  // Filter out empty/invalid URLs, then fetch all oEmbeds in parallel
   const validTracks = tracks.filter((t) => t.url?.trim())
   if (!validTracks.length) return null
 
-  const embeds = await Promise.all(validTracks.map(fetchEmbed))
-
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {embeds.map((embed, i) => (
-        <a
-          key={i}
-          href={embed.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group block"
-          aria-label={`${embed.title} on ${embed.platform}`}
-        >
-          {/* Artwork */}
-          <div
-            className="relative aspect-square overflow-hidden mb-3"
-            style={{ background: '#111' }}
-          >
-            {embed.thumbnail ? (
-              // Using plain <img> so external CDN URLs don't need next.config remote patterns
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={embed.thumbnail}
-                alt={embed.title}
-                loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                style={{ filter: 'brightness(0.85)' }}
-              />
-            ) : (
-              <div
-                className="flex items-center justify-center h-full"
-                style={{ color: '#444' }}
-              >
-                <span className="font-mono text-xs uppercase tracking-widest">
-                  {embed.platform}
-                </span>
-              </div>
-            )}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {validTracks.map((track, i) => {
+        const embed = getEmbed(track.url)
 
-            {/* Play overlay on hover */}
-            <div
-              className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ background: 'rgba(0,0,0,0.5)' }}
+        // External / unrecognized URL — fall back to a link card
+        if (embed.type === 'external' || !embed.embedUrl) {
+          return (
+            <a
+              key={i}
+              href={track.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center border p-6 transition-colors hover:border-[#4E7DFE]"
+              style={{
+                borderColor: '#222',
+                height: PLAYER_HEIGHT,
+                background: '#0a0a0a',
+              }}
             >
-              <svg
-                width="56"
-                height="56"
-                viewBox="0 0 56 56"
-                fill="none"
-                aria-hidden="true"
+              <p
+                className="font-mono text-xs uppercase tracking-widest mb-3"
+                style={{ color: ACCENT }}
               >
-                <circle cx="28" cy="28" r="28" fill={ACCENT} />
-                <path d="M22 18l16 10-16 10z" fill="#000" />
-              </svg>
+                Listen
+              </p>
+              <p
+                className="text-sm text-center truncate w-full"
+                style={{ color: '#888' }}
+              >
+                {track.title || track.url}
+              </p>
+              <p
+                className="font-mono text-[10px] uppercase tracking-widest mt-3"
+                style={{ color: '#666' }}
+              >
+                Open →
+              </p>
+            </a>
+          )
+        }
+
+        if (embed.type === 'youtube') {
+          return (
+            <div
+              key={i}
+              className="overflow-hidden border"
+              style={{
+                borderColor: '#222',
+                height: PLAYER_HEIGHT,
+                background: '#000',
+              }}
+            >
+              <iframe
+                src={embed.embedUrl}
+                title={track.title || `Track ${i + 1}`}
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full"
+                style={{ border: 0 }}
+              />
             </div>
+          )
+        }
 
-            {/* Corner accents on hover */}
+        if (embed.type === 'spotify') {
+          return (
             <div
-              className="absolute top-2 left-2 w-3 h-3 transition-all duration-300"
-              style={{
-                borderTop: `2px solid transparent`,
-                borderLeft: `2px solid transparent`,
-              }}
-            />
-            <div
-              className="absolute top-2 right-2 w-3 h-3 transition-all duration-300 opacity-0 group-hover:opacity-100"
-              style={{
-                borderTop: `2px solid ${ACCENT}`,
-                borderRight: `2px solid ${ACCENT}`,
-              }}
-            />
-            <div
-              className="absolute bottom-2 left-2 w-3 h-3 transition-all duration-300 opacity-0 group-hover:opacity-100"
-              style={{
-                borderBottom: `2px solid ${ACCENT}`,
-                borderLeft: `2px solid ${ACCENT}`,
-              }}
-            />
-            <div
-              className="absolute bottom-2 right-2 w-3 h-3 transition-all duration-300 opacity-0 group-hover:opacity-100"
-              style={{
-                borderBottom: `2px solid ${ACCENT}`,
-                borderRight: `2px solid ${ACCENT}`,
-              }}
-            />
-          </div>
+              key={i}
+              className="overflow-hidden"
+              style={{ height: PLAYER_HEIGHT }}
+            >
+              <iframe
+                src={embed.embedUrl}
+                title={track.title || `Spotify track ${i + 1}`}
+                loading="lazy"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                className="w-full h-full"
+                style={{ border: 0 }}
+              />
+            </div>
+          )
+        }
 
-          {/* Title + platform */}
-          <h3
-            className="font-bold text-sm mb-1 truncate transition-colors duration-200 group-hover:text-[#4E7DFE]"
-            style={{ color: '#fff' }}
-          >
-            {embed.title}
-          </h3>
-          <p
-            className="font-mono text-[10px] uppercase tracking-widest"
-            style={{ color: '#666' }}
-          >
-            {embed.platform}
-          </p>
-        </a>
-      ))}
+        if (embed.type === 'soundcloud') {
+          return (
+            <div
+              key={i}
+              className="overflow-hidden border"
+              style={{
+                borderColor: '#222',
+                height: PLAYER_HEIGHT,
+              }}
+            >
+              <iframe
+                src={embed.embedUrl}
+                title={track.title || `SoundCloud track ${i + 1}`}
+                loading="lazy"
+                allow="autoplay"
+                className="w-full h-full"
+                style={{ border: 0 }}
+              />
+            </div>
+          )
+        }
+
+        return null
+      })}
     </div>
   )
 }
