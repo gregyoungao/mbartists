@@ -76,7 +76,7 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
           {"// Featured"}
         </p>
         <h2
-          className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight"
+          className="text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight"
           style={{ color: INK }}
         >
           Our Roster
