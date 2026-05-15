@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 
 const ACCENT = "#4E7DFE"
