@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation"
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/artists", label: "Our Roster" },
+  { href: "/academy", label: "Academy" },
   { href: "/agents", label: "Our Team" },
   { href: "/book", label: "Make An Enquiry" },
 ]
