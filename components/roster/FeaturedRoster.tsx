@@ -21,15 +21,28 @@ interface FeaturedArtist {
 
 interface FeaturedRosterProps {
   artists: FeaturedArtist[]
+  // Optional — defaults preserve the "Our Roster" section (no eyebrow by default)
+  title?: string
+  eyebrow?: string
+  tagline?: string
+  bg?: string
 }
 
-const BG = "#d9d9d9"
 const INK = "#0a0a0a"
 const ACCENT = "#4E7DFE"
 const CARD_WIDTH = 300
 const GAP = 16
 
-export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
+const DEFAULT_TAGLINE =
+  "We are chosen to represent some of the world's best artists across the genres of electronic dance music. Browse through our roster."
+
+export default function FeaturedRoster({
+  artists,
+  title = "Our Roster",
+  eyebrow = "", // default: no eyebrow (Academy passes its own)
+  tagline = DEFAULT_TAGLINE,
+  bg = "#d9d9d9",
+}: FeaturedRosterProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   if (artists.length === 0) {
@@ -37,8 +50,6 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
   }
 
   // Duplicate the list so the scroll wraps seamlessly (no jump back to start).
-  // The CSS animation moves the track by exactly the width of ONE full set;
-  // when it loops, the second set is already in view, so there's no visible reset.
   const loopedArtists = [...artists, ...artists]
 
   // Slower pace: ~5s per card width, with a 35s floor for short rosters
@@ -47,14 +58,16 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
   // Animation pauses only when a specific card is hovered, not the whole section
   const isPaused = hoveredIndex !== null
 
+  // Unique keyframe name per section so two instances don't collide
+  const animName = `mb-roster-scroll-${title.replace(/[^a-z0-9]/gi, "").toLowerCase()}`
+
   return (
     <section
       className={`relative py-20 md:py-28 overflow-hidden ${golos.className}`}
-      style={{ background: BG }}
+      style={{ background: bg }}
     >
-      {/* Keyframes for the infinite scroll — defined inline so the file is self-contained */}
       <style>{`
-        @keyframes mb-roster-scroll {
+        @keyframes ${animName} {
           from { transform: translateX(0); }
           to   { transform: translateX(calc(-50% - ${GAP / 2}px)); }
         }
@@ -62,28 +75,30 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
 
       {/* Section header — centered */}
       <div className="px-6 md:px-12 mb-12 text-center">
-        <p
-          className="font-mono text-xs tracking-widest uppercase mb-3"
-          style={{ color: ACCENT }}
+        {eyebrow && (
+          <p
+            className="font-mono text-xs tracking-widest uppercase mb-3"
+            style={{ color: ACCENT }}
+          >
+            {eyebrow}
+          </p>
+        )}
+        <h2
+          className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight"
+          style={{ color: INK }}
         >
-          {""}
-        </p>
-    <h2
-  className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight"
-  style={{ color: INK }}
->
-  Our Roster
-</h2>
+          {title}
+        </h2>
       </div>
 
-      {/* Track — duplicated list, animated horizontally. Centered on wide screens via max-w-7xl + mx-auto. */}
-      <div className="overflow-hidden max-w-7xl mx-auto">
+      {/* Track — full-width, animated horizontally */}
+      <div className="overflow-hidden">
         <div
           className="flex"
           style={{
             gap: `${GAP}px`,
             width: "max-content",
-            animation: `mb-roster-scroll ${durationSec}s linear infinite`,
+            animation: `${animName} ${durationSec}s linear infinite`,
             animationPlayState: isPaused ? "paused" : "running",
           }}
         >
@@ -199,9 +214,7 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
           className="max-w-2xl mx-auto mb-6 text-sm md:text-base"
           style={{ color: "#444" }}
         >
-          We are chosen to represent some of the world&apos;s best artists
-          across the genres of electronic dance music. Browse through our
-          roster.
+          {tagline}
         </p>
 
         <Link
