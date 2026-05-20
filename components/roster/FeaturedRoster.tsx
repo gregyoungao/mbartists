@@ -66,7 +66,7 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
           className="font-mono text-xs tracking-widest uppercase mb-3"
           style={{ color: ACCENT }}
         >
-          {"// Featured"}
+          {""}
         </p>
         <h2
           className="text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight"
