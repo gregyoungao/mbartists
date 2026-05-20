@@ -80,7 +80,7 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
             Our Roster
           </p>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-balance mb-6">
-            Artists
+            MB Artists
           </h1>
           <p className="text-lg md:text-xl max-w-2xl" style={{ color: "#666" }}>
             {filteredArtists.length} artists
