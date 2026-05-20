@@ -124,12 +124,12 @@ export default async function ArtistPage({
               </div>
             </div>
 
-            {/* Right — small bio (14px, min-height 384) */}
+            {/* Right — small bio (14px, sizes to content) */}
             <div>
               {artist.small_bio && (
                 <p
                   className="leading-[1.7]"
-                  style={{ fontSize: '14px', color: '#aaa', minHeight: '384px' }}
+                  style={{ fontSize: '14px', color: '#aaa' }}
                 >
                   {artist.small_bio}
                 </p>
@@ -140,7 +140,7 @@ export default async function ArtistPage({
 
         {/* ───────── Bio + Agents ───────── */}
         <section className="px-20 max-w-[1280px] mx-auto pt-14 pb-16">
-          <div className="grid gap-12 items-start mb-20 pb-16 border-b border-[#1a1a1a] grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
+          <div className="grid gap-12 items-start mb-20 grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
             {/* Left — Biography (column 680, text 476) */}
             <div>
               <h2 className="font-mono text-xs tracking-widest uppercase mb-6" style={{ color: '#4E7DFE' }}>
