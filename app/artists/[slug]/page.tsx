@@ -2,8 +2,9 @@
 // app/artists/[slug]/page.tsx
 // Artist profile page
 //   - Hero: image only (no fade), "All Artists" gray button bottom-left
-//   - Intro: name + chips + socials (max 751w) | small bio 14px (min 384h)
-//   - Bio + Agents: biography 14px (max 680w) | primary + secondary side-by-side, "Make Enquiry" button below
+//   - Intro: name + chips + socials (max 680w) | small bio 14px (min 384h)
+//   - Bio + Agents: biography column 680w but text constrained to 476w
+//                   | primary + secondary agents side-by-side + Make Enquiry button
 //   - Spotlight tracks (4-col grid)
 // =========================================================
 
@@ -70,11 +71,11 @@ export default async function ArtistPage({
 
         {/* ───────── Intro (name | small bio) ───────── */}
         <section className="px-8 max-w-[1280px] mx-auto pt-14 pb-12">
-          <div className="grid gap-12 items-start grid-cols-1 lg:grid-cols-[minmax(0,751px)_1fr]">
+          <div className="grid gap-12 items-start grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
             {/* Left — name + chips + socials */}
-            <div className="max-w-[751px]">
+            <div className="max-w-[680px]">
               <h1
-                className="font-bold tracking-tight mb-6 whitespace-nowrap"
+                className="font-bold tracking-tight mb-6 whitespace-nowrap overflow-hidden text-ellipsis"
                 style={{ fontSize: 'clamp(40px, 5vw, 72px)', lineHeight: 1, letterSpacing: '-0.02em' }}
               >
                 {artist.name}
@@ -140,12 +141,13 @@ export default async function ArtistPage({
         {/* ───────── Bio + Agents ───────── */}
         <section className="px-8 max-w-[1280px] mx-auto pb-16">
           <div className="grid gap-12 items-start mb-20 grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
-            {/* Left — Biography (14px text) */}
+            {/* Left — Biography (column 680, text 476) */}
             <div>
               <h2 className="font-mono text-xs tracking-widest uppercase mb-6" style={{ color: '#4E7DFE' }}>
                 {'// Biography'}
               </h2>
-              <div className="space-y-3">
+              {/* Text constrained to 476px (30% narrower than column) */}
+              <div className="space-y-3 max-w-[476px]">
                 {(artist.large_bio || '').split('\n\n').map((p, i) => (
                   <p key={i} style={{ fontSize: '14px', lineHeight: '1.65', color: '#aaa' }}>
                     {p}
@@ -157,7 +159,6 @@ export default async function ArtistPage({
             {/* Right — Primary + Secondary agents, then Make Enquiry button */}
             <div className="flex flex-col gap-8">
               <div className="grid grid-cols-2 gap-6">
-                {/* Primary */}
                 {artist.primary_agent && (
                   <AgentBlock
                     label="// Primary Agent"
@@ -166,7 +167,6 @@ export default async function ArtistPage({
                     slug={artist.primary_agent.slug}
                   />
                 )}
-                {/* Secondary — only renders if set */}
                 {artist.secondary_agent && (
                   <AgentBlock
                     label="// Secondary Agent"
@@ -177,7 +177,7 @@ export default async function ArtistPage({
                 )}
               </div>
 
-              {/* Make an Enquiry — pre-fills this artist. Tailwind hover so this can stay in a server component. */}
+              {/* Make an Enquiry — pure CSS hover so this can stay in a server component */}
               <Link
                 href={`/book?artist=${artist.id}`}
                 className="inline-flex items-center gap-3 self-start font-mono text-xs uppercase tracking-widest px-6 py-3.5 transition-all duration-200
