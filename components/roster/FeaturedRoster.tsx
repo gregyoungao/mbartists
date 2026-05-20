@@ -68,12 +68,12 @@ export default function FeaturedRoster({ artists }: FeaturedRosterProps) {
         >
           {""}
         </p>
-        <h2
-          className="text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight"
-          style={{ color: INK }}
-        >
-          Our Roster
-        </h2>
+    <h2
+  className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight"
+  style={{ color: INK }}
+>
+  Our Roster
+</h2>
       </div>
 
       {/* Track — duplicated list, animated horizontally. Centered on wide screens via max-w-7xl + mx-auto. */}
