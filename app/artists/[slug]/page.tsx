@@ -70,7 +70,7 @@ export default async function ArtistPage({
         </section>
 
         {/* ───────── Intro (name | small bio) ───────── */}
-        <section className="px-8 max-w-[1280px] mx-auto pt-14 pb-12">
+        <section className="px-20 max-w-[1280px] mx-auto pt-14 pb-16 border-b border-[#1a1a1a]">
           <div className="grid gap-12 items-start grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
             {/* Left — name + chips + socials */}
             <div className="max-w-[680px]">
@@ -139,8 +139,8 @@ export default async function ArtistPage({
         </section>
 
         {/* ───────── Bio + Agents ───────── */}
-        <section className="px-8 max-w-[1280px] mx-auto pb-16">
-          <div className="grid gap-12 items-start mb-20 grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
+        <section className="px-20 max-w-[1280px] mx-auto pt-14 pb-16">
+          <div className="grid gap-12 items-start mb-20 pb-16 border-b border-[#1a1a1a] grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
             {/* Left — Biography (column 680, text 476) */}
             <div>
               <h2 className="font-mono text-xs tracking-widest uppercase mb-6" style={{ color: '#4E7DFE' }}>
