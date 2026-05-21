@@ -40,7 +40,7 @@ export default function AgentDetailView({ agent }: Props) {
           src={agent.photo}
           alt={agent.name}
           fill
-          className="object-cover"
+          className="object-cover object-top"
           priority
         />
 
