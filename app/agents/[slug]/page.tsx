@@ -22,6 +22,7 @@ export interface AgentRosterArtist {
 export interface AgentDetail {
   name: string
   photo: string
+  photoFocusY?: number  // ← ADD THIS LINE
   email: string
   roles: string[]
   bio: string
@@ -35,7 +36,7 @@ async function getAgent(slug: string): Promise<AgentDetail | null> {
 
   const { data: agent } = await supabase
     .from('agents')
-    .select('id, slug, name, photo_url, contact_email, role, bio, instagram, linkedin')
+    .select('id, slug, name, photo_url, photo_focus_y, contact_email, role, bio, instagram, linkedin')
     .eq('slug', slug)
     .maybeSingle()
 
@@ -63,6 +64,7 @@ async function getAgent(slug: string): Promise<AgentDetail | null> {
   return {
     name: agent.name,
     photo: agent.photo_url || '/placeholder-artist.jpg',
+    photoFocusY: agent.photo_focus_y ?? 50,
     email: agent.contact_email || '',
     roles: agent.role ? [getRoleLabel(agent.role)] : [],
     bio: agent.bio || '',

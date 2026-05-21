@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AGENT_ROLES } from '@/lib/roles'
 
@@ -15,6 +15,8 @@ export interface AgentFormValues {
   instagram: string
   linkedin: string
   photoUrl: string | null
+  /** Vertical focal point 0-100 (0 = top, 50 = center, 100 = bottom) */
+  photoFocusY?: number
 }
 
 interface Props {
@@ -36,9 +38,29 @@ export default function AgentForm({ initial = {}, mode }: Props) {
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [existingPhotoUrl] = useState(initial.photoUrl || null)
 
+  // Focal point (vertical): 0 = top, 50 = center, 100 = bottom. Default 50.
+  const [photoFocusY, setPhotoFocusY] = useState<number>(initial.photoFocusY ?? 50)
+
+  // Local URL for new file preview (revoked on cleanup)
+  const [newFilePreviewUrl, setNewFilePreviewUrl] = useState<string | null>(null)
+
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  // Build/cleanup blob URL when a new file is selected
+  useEffect(() => {
+    if (!photoFile) {
+      setNewFilePreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(photoFile)
+    setNewFilePreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [photoFile])
+
+  // The image src for the focal-point preview: new file > existing photo > none
+  const previewSrc = newFilePreviewUrl || existingPhotoUrl
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,14 +77,26 @@ export default function AgentForm({ initial = {}, mode }: Props) {
       fd.append('role', role)
       fd.append('instagram', instagram)
       fd.append('linkedin', linkedin)
+      fd.append('photoFocusY', String(photoFocusY))
       if (password) fd.append('password', password)
       if (photoFile) fd.append('photo', photoFile)
       if (initial.id) fd.append('agentId', initial.id)
 
       const endpoint = mode === 'create' ? '/api/admin/create-agent' : '/api/admin/update-agent'
       const res = await fetch(endpoint, { method: 'POST', body: fd })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Save failed')
+
+      // Read as text first so we can show server errors gracefully
+      const responseText = await res.text()
+      if (!res.ok) {
+        let msg = 'Save failed'
+        try {
+          const json = JSON.parse(responseText)
+          if (json?.error) msg = json.error
+        } catch {
+          if (responseText && responseText.length < 200) msg = responseText
+        }
+        throw new Error(msg)
+      }
 
       if (mode === 'create') {
         router.push('/admin/agents')
@@ -72,7 +106,7 @@ export default function AgentForm({ initial = {}, mode }: Props) {
         router.refresh()
       }
     } catch (err: any) {
-      setError(err.message)
+      setError(err?.message || 'Something went wrong.')
     } finally {
       setSubmitting(false)
     }
@@ -140,22 +174,23 @@ export default function AgentForm({ initial = {}, mode }: Props) {
         label={mode === 'create' ? 'Photo *' : 'Photo'}
         hint={mode === 'edit' && existingPhotoUrl ? 'Leave empty to keep existing photo.' : undefined}
       >
-        {existingPhotoUrl && mode === 'edit' && (
-          <img
-            src={existingPhotoUrl}
-            alt="Current"
-            className="w-24 h-24 object-cover mb-3 border"
-            style={{ borderColor: '#222' }}
-          />
-        )}
         <input
           type="file"
           accept="image/*"
           required={mode === 'create'}
           onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
-          className="font-mono text-sm w-full file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-[#4E7DFE] file:text-black file:font-mono file:text-xs file:uppercase file:tracking-wider cursor-pointer"
+          className="font-mono text-sm w-full file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-[#4E7DFE] file:text-black file:font-mono file:text-xs file:uppercase file:tracking-wider cursor-pointer mb-4"
           style={{ color: '#888' }}
         />
+
+        {previewSrc && (
+          <FocalPointEditor
+            src={previewSrc}
+            value={photoFocusY}
+            onChange={setPhotoFocusY}
+            label="hero crop preview"
+          />
+        )}
       </Field>
 
       <Field label="Bio *">
@@ -235,5 +270,86 @@ function Input({
       onFocus={(e) => (e.currentTarget.style.borderColor = '#4E7DFE')}
       onBlur={(e) => (e.currentTarget.style.borderColor = '#222')}
     />
+  )
+}
+
+/**
+ * Live preview + slider for vertical focal point (0-100, % from top).
+ * The preview frame matches the hero aspect ratio so what you see here
+ * is exactly what visitors see on the public profile page.
+ */
+export function FocalPointEditor({
+  src,
+  value,
+  onChange,
+  label = 'focal point',
+}: {
+  src: string
+  value: number
+  onChange: (v: number) => void
+  label?: string
+}) {
+  return (
+    <div className="space-y-3">
+      <p className="font-mono text-[10px] uppercase tracking-widest" style={{ color: '#555' }}>
+        {`// ${label}`}
+      </p>
+
+      {/* Preview frame uses approximate hero aspect (16/9) so it matches the live page */}
+      <div
+        className="relative w-full overflow-hidden border"
+        style={{ aspectRatio: '16 / 9', borderColor: '#222' }}
+      >
+        {/* The cropped photo, anchored at the current focal point */}
+        <img
+          src={src}
+          alt="Focal point preview"
+          className="w-full h-full object-cover"
+          style={{ objectPosition: `center ${value}%` }}
+        />
+
+        {/* Subtle indicator line showing where the focal point is in the SOURCE image */}
+        {/* (helpful for understanding which part of the original photo is being centered) */}
+        <div
+          className="absolute left-0 right-0 pointer-events-none"
+          style={{
+            top: `${value}%`,
+            transform: 'translateY(-50%)',
+            height: '1px',
+            background: 'rgba(78, 125, 254, 0.6)',
+            boxShadow: '0 0 8px rgba(78, 125, 254, 0.6)',
+            display: 'none', // hidden — see note: object-position doesn't map 1:1 to source coords when cover-cropping
+          }}
+        />
+      </div>
+
+      {/* Slider with value display */}
+      <div className="flex items-center gap-4">
+        <span className="font-mono text-[10px] uppercase tracking-wider w-10" style={{ color: '#555' }}>
+          Top
+        </span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={value}
+          onChange={(e) => onChange(parseInt(e.target.value, 10))}
+          className="flex-1 cursor-pointer accent-[#4E7DFE]"
+        />
+        <span className="font-mono text-[10px] uppercase tracking-wider w-12 text-right" style={{ color: '#555' }}>
+          Bottom
+        </span>
+        <span
+          className="font-mono text-xs px-2 py-1 border w-12 text-center"
+          style={{ borderColor: '#222', color: '#4E7DFE' }}
+        >
+          {value}
+        </span>
+      </div>
+
+      <p className="font-mono text-[10px]" style={{ color: '#555' }}>
+        Drag the slider to focus on the face. {value === 50 ? '(50 = center, default)' : value < 50 ? '(focused on upper part)' : '(focused on lower part)'}
+      </p>
+    </div>
   )
 }

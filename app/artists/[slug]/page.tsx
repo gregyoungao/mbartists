@@ -39,6 +39,10 @@ export default async function ArtistPage({
   const spotlights = getArtistSpotlights(artist)
   const tracks = spotlights.map((url, i) => ({ url, title: `Track ${i + 1}` }))
 
+  // Vertical focal point for the hero image (0 = top, 50 = center, 100 = bottom).
+  // Falls back to center (50) for older artists that don't have the column set.
+  const focusY = (artist as any).image_focus_y ?? 50
+
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
       <Navigation />
@@ -51,6 +55,7 @@ export default async function ArtistPage({
             alt={artist.name}
             fill
             className="object-cover"
+            style={{ objectPosition: `center ${focusY}%` }}
             priority
           />
 

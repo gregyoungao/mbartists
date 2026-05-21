@@ -40,7 +40,8 @@ export default function AgentDetailView({ agent }: Props) {
           src={agent.photo}
           alt={agent.name}
           fill
-          className="object-cover object-top"
+          className="object-cover"
+          style={{ objectPosition: `center ${agent.photoFocusY ?? 50}%` }}
           priority
         />
 

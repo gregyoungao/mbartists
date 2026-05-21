@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { FocalPointEditor } from '@/components/admin/AgentForm'
 
 interface ArtistFormInitial {
   id?: string
@@ -23,6 +24,8 @@ interface ArtistFormInitial {
   spotlight3: string
   spotlight4: string
   imageUrl: string | null
+  /** Vertical focal point 0-100 (0 = top, 50 = center, 100 = bottom) */
+  imageFocusY?: number
   selectedGenres: string[]
   selectedLocations: string[]
 }
@@ -67,12 +70,28 @@ export default function ArtistForm({
   const [imageFile, setImageFile] = useState<File | null>(null)
   const existingImageUrl = initial.imageUrl || null
 
+  // Focal point: 0 = top, 50 = center, 100 = bottom. Default 50.
+  const [imageFocusY, setImageFocusY] = useState<number>(initial.imageFocusY ?? 50)
+  const [newFilePreviewUrl, setNewFilePreviewUrl] = useState<string | null>(null)
+
   const [selectedGenres, setSelectedGenres] = useState<string[]>(initial.selectedGenres || [])
   const [selectedLocations, setSelectedLocations] = useState<string[]>(initial.selectedLocations || [])
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (!imageFile) {
+      setNewFilePreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(imageFile)
+    setNewFilePreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [imageFile])
+
+  const previewSrc = newFilePreviewUrl || existingImageUrl
 
   const toggleGenre = (id: string) => {
     setSelectedGenres((prev) =>
@@ -125,24 +144,34 @@ export default function ArtistForm({
       fd.append('spotlight2', spotlight2)
       fd.append('spotlight3', spotlight3)
       fd.append('spotlight4', spotlight4)
+      fd.append('imageFocusY', String(imageFocusY))
       fd.append('genres', JSON.stringify(selectedGenres))
       fd.append('locations', JSON.stringify(selectedLocations))
       if (imageFile) fd.append('image', imageFile)
 
       const res = await fetch('/api/admin/save-artist', { method: 'POST', body: fd })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Save failed')
+
+      const responseText = await res.text()
+      if (!res.ok) {
+        let msg = 'Save failed'
+        try {
+          const json = JSON.parse(responseText)
+          if (json?.error) msg = json.error
+        } catch {
+          if (responseText && responseText.length < 200) msg = responseText
+        }
+        throw new Error(msg)
+      }
 
       setSaved(true)
       setSubmitting(false)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err: any) {
-      setError(err.message)
+      setError(err?.message || 'Something went wrong.')
       setSubmitting(false)
     }
   }
 
-  // After successful save, show a confirmation panel instead of the form
   if (saved) {
     const backLabel = redirectTo.includes('dashboard') ? 'My Roster' : 'Artists'
     return (
@@ -204,22 +233,23 @@ export default function ArtistForm({
         label={mode === 'create' ? 'Image *' : 'Image'}
         hint={mode === 'edit' && existingImageUrl ? 'Leave empty to keep existing image.' : undefined}
       >
-        {existingImageUrl && (
-          <img
-            src={existingImageUrl}
-            alt="Current"
-            className="w-32 h-32 object-cover mb-3 border"
-            style={{ borderColor: '#222' }}
-          />
-        )}
         <input
           type="file"
           accept="image/*"
           required={mode === 'create'}
           onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-          className="font-mono text-sm w-full file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-[#4E7DFE] file:text-black file:font-mono file:text-xs file:uppercase file:tracking-wider cursor-pointer"
+          className="font-mono text-sm w-full file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-[#4E7DFE] file:text-black file:font-mono file:text-xs file:uppercase file:tracking-wider cursor-pointer mb-4"
           style={{ color: '#888' }}
         />
+
+        {previewSrc && (
+          <FocalPointEditor
+            src={previewSrc}
+            value={imageFocusY}
+            onChange={setImageFocusY}
+            label="hero crop preview"
+          />
+        )}
       </Field>
 
       <Field label="Primary Agent *" hint={lockPrimaryAgent ? "You are assigned as the primary agent for artists you create." : undefined}>

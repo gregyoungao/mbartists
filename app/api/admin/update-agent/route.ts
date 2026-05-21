@@ -44,6 +44,16 @@ export async function POST(req: Request) {
       photo_url = pub.publicUrl
     }
 
+    // Parse focal point — clamped to 0-100, default 50
+    const focusYRaw = fd.get('photoFocusY')
+    let photo_focus_y = 50
+    if (focusYRaw !== null && focusYRaw !== '') {
+      const n = parseInt(String(focusYRaw), 10)
+      if (!Number.isNaN(n)) {
+        photo_focus_y = Math.max(0, Math.min(100, n))
+      }
+    }
+
     const updates: any = {
       name: String(fd.get('name') || '').trim(),
       contact_email: String(fd.get('contactEmail') || '').trim() || null,
@@ -52,6 +62,7 @@ export async function POST(req: Request) {
       instagram: String(fd.get('instagram') || '').trim() || null,
       linkedin: String(fd.get('linkedin') || '').trim() || null,
       photo_url,
+      photo_focus_y,
     }
 
     const { error: updateErr } = await supabase

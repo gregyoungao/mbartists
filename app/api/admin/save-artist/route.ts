@@ -102,10 +102,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Image is required' }, { status: 400 })
     }
 
+    // Parse focal point — clamped to 0-100, default 50
+    const focusYRaw = fd.get('imageFocusY')
+    let image_focus_y = 50
+    if (focusYRaw !== null && focusYRaw !== '') {
+      const n = parseInt(String(focusYRaw), 10)
+      if (!Number.isNaN(n)) {
+        image_focus_y = Math.max(0, Math.min(100, n))
+      }
+    }
+
     const payload = {
       slug: slug!,
       name,
       image_url,
+      image_focus_y,
       primary_agent_id: primaryAgentId,
       secondary_agent_id: secondaryAgentId,
       small_bio: String(fd.get('smallBio') || '').trim() || null,
