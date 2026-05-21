@@ -1,29 +1,17 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 
-const ARTISTS = [
+/**
+ * Fallback list — used until the API call completes, or if the call fails.
+ * Keeps the logo from flashing empty on first load.
+ */
+const FALLBACK_ARTISTS = [
   'ADELE', 'ARCTIC MONKEYS', 'BICEP', 'BILLIE EILISH', 'BLOC PARTY',
-  'BURIAL', 'CARIBOU', 'CAROLINE POLACHEK', 'CHROMATICS', 'CONFIDENCE MAN',
-  'DAFT PUNK', 'DANIEL AVERY', 'DISCLOSURE', 'DJ KOZE', 'DJ SHADOW',
-  'DRAIN GANG', 'FLOATING POINTS', 'FOUR TET', 'FRED AGAIN', 'GEORGE FITZGERALD',
-  'GOLDIE', 'HELEN MONEY', 'HERBIE HANCOCK', 'HOOKWORMS', 'JAMIE XX',
-  'JOHN TALABOT', 'JOHN GRANT', 'JON HOPKINS', 'JULIO BASHMORE', 'KELLY LEE OWENS',
-  'KIASMOS', 'KID HARPOON', 'KINDNESS', 'KORELESS', 'LANTERNS ON THE LAKE',
-  'LORDE', 'LOW', 'LUCY DACUS', 'MARCUS MARR', 'MARIBOU STATE', 'MODERAT',
-  'MOUNT KIMBIE', 'NIGHT SLUGS', 'OBJEKT', 'OLIVER COATES', 'OVERMONO',
-  'PANDA BEAR', 'PARIAH', 'PEGGY GOU', 'POLO PAN', 'PORTISHEAD', 'PREFUSE',
-  'PRINCESS NOKIA', 'RADIO SLAVE', 'RIVAL CONSOLES', 'ROBERT GLASPER',
-  'ROSS FROM FRIENDS', 'RUSTIE', 'SHACKLETON', 'SHLOHMO', 'SKREAM', 'SLOWDIVE',
-  'SOPHIE', 'SQUID', 'STERLING VOID', 'THE XX', 'THOM YORKE', 'TIRZAH',
-  'TOM MISCH', 'VARG', 'VESSEL', 'WARMDUSCHER', 'WEYES BLOOD', 'WARPAINT',
-  'YOUNG FATHERS', 'YVES TUMOR', 'FOUR TET', 'JON HOPKINS', 'FRED AGAIN',
+  'BURIAL', 'CARIBOU', 'CAROLINE POLACHEK', 'CHROMATICS', 'DAFT PUNK',
+  'DISCLOSURE', 'FLOATING POINTS', 'FOUR TET', 'JAMIE XX', 'JON HOPKINS',
+  'PEGGY GOU', 'PORTISHEAD', 'THE XX', 'THOM YORKE', 'YOUNG FATHERS',
 ]
-
-// Build a continuous string of artist names with separators for sequential placement
-// Each name is separated by a bullet point to visually distinguish them
-const ARTIST_STRING = ARTISTS.join(' · ')
-const ARTIST_CHARS = ARTIST_STRING.split('')
 
 interface Cell {
   char: string
@@ -41,87 +29,112 @@ export default function LogoSymbolCanvas() {
   const rafRef = useRef<number>(0)
   const sizeRef = useRef({ w: 0, h: 0, dpr: 1 })
 
-  // Build grid from logo image
-  const buildGrid = useCallback((canvas: HTMLCanvasElement) => {
-    const dpr = window.devicePixelRatio || 1
-    const w = canvas.offsetWidth
-    const h = canvas.offsetHeight
-    sizeRef.current = { w, h, dpr }
+  // Artist list — starts with fallback, replaced once API responds
+  const [artists, setArtists] = useState<string[]>(FALLBACK_ARTISTS)
 
-    canvas.width = w * dpr
-    canvas.height = h * dpr
-
-    // Offscreen canvas to sample logo pixels
-    const CHAR_W = 12
-    const CHAR_H = 14
-    const cols = Math.floor(w / CHAR_W)
-    const rows = Math.floor(h / CHAR_H)
-
-    const offscreen = document.createElement('canvas')
-    offscreen.width = cols
-    offscreen.height = rows
-    const octx = offscreen.getContext('2d')!
-
-    const img = new window.Image()
-    img.crossOrigin = 'anonymous'
-    img.style.width = 'auto'
-    img.style.height = 'auto'
-    img.src = '/logo.webp'
-    img.onload = () => {
-      // Draw logo centered and scaled on the offscreen canvas
-      const logoAspect = img.naturalWidth / img.naturalHeight
-      const canvasAspect = cols / rows
-
-      let drawW = cols * 0.98
-      let drawH = drawW / logoAspect
-
-      if (drawH > rows * 0.98) {
-        drawH = rows * 0.98
-        drawW = drawH * logoAspect
-      }
-
-      const ox = (cols - drawW) / 2
-      const oy = (rows - drawH) / 2
-
-      // White background for threshold
-      octx.fillStyle = '#000'
-      octx.fillRect(0, 0, cols, rows)
-      // Draw white logo on black bg
-      octx.globalCompositeOperation = 'source-over'
-      octx.drawImage(img, ox, oy, drawW, drawH)
-
-      const imageData = octx.getImageData(0, 0, cols, rows)
-      const data = imageData.data
-
-      const cells: Cell[] = []
-      let charIndex = 0
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-          const idx = (row * cols + col) * 4
-          const r = data[idx]
-          const g = data[idx + 1]
-          const b = data[idx + 2]
-          const brightness = (r + g + b) / 3
-
-          if (brightness > 30) {
-            // This pixel is part of the logo
-            const alpha = Math.min(1, brightness / 255)
-            cells.push({
-              char: ARTIST_CHARS[charIndex % ARTIST_CHARS.length],
-              x: col * CHAR_W + CHAR_W / 2,
-              y: row * CHAR_H + CHAR_H,
-              lit: 0,
-              target: 0,
-              baseAlpha: 0.12 + alpha * 0.18,
-            })
-            charIndex++
-          }
+  // Fetch real artist names once on mount
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/artist-names')
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return
+        if (Array.isArray(data?.names) && data.names.length > 0) {
+          setArtists(data.names)
         }
-      }
-
-      cellsRef.current = cells
+      })
+      .catch(() => {
+        // Silently keep fallback list on failure
+      })
+    return () => {
+      cancelled = true
     }
   }, [])
+
+  // Char string derived from current artist list
+  const artistChars = artists.join(' · ').split('')
+
+  // Build grid from logo image (rebuilds when artistChars changes)
+  const buildGrid = useCallback(
+    (canvas: HTMLCanvasElement) => {
+      const dpr = window.devicePixelRatio || 1
+      const w = canvas.offsetWidth
+      const h = canvas.offsetHeight
+      sizeRef.current = { w, h, dpr }
+
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+
+      // Offscreen canvas to sample logo pixels
+      const CHAR_W = 12
+      const CHAR_H = 14
+      const cols = Math.floor(w / CHAR_W)
+      const rows = Math.floor(h / CHAR_H)
+
+      const offscreen = document.createElement('canvas')
+      offscreen.width = cols
+      offscreen.height = rows
+      const octx = offscreen.getContext('2d')!
+
+      const img = new window.Image()
+      img.crossOrigin = 'anonymous'
+      img.style.width = 'auto'
+      img.style.height = 'auto'
+      img.src = '/logo.webp'
+      img.onload = () => {
+        const logoAspect = img.naturalWidth / img.naturalHeight
+
+        let drawW = cols * 0.98
+        let drawH = drawW / logoAspect
+
+        if (drawH > rows * 0.98) {
+          drawH = rows * 0.98
+          drawW = drawH * logoAspect
+        }
+
+        const ox = (cols - drawW) / 2
+        const oy = (rows - drawH) / 2
+
+        octx.fillStyle = '#000'
+        octx.fillRect(0, 0, cols, rows)
+        octx.globalCompositeOperation = 'source-over'
+        octx.drawImage(img, ox, oy, drawW, drawH)
+
+        const imageData = octx.getImageData(0, 0, cols, rows)
+        const data = imageData.data
+
+        const cells: Cell[] = []
+        let charIndex = 0
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < cols; col++) {
+            const idx = (row * cols + col) * 4
+            const r = data[idx]
+            const g = data[idx + 1]
+            const b = data[idx + 2]
+            const brightness = (r + g + b) / 3
+
+            if (brightness > 30) {
+              const alpha = Math.min(1, brightness / 255)
+              cells.push({
+                char: artistChars[charIndex % artistChars.length],
+                x: col * CHAR_W + CHAR_W / 2,
+                y: row * CHAR_H + CHAR_H,
+                lit: 0,
+                target: 0,
+                baseAlpha: 0.12 + alpha * 0.18,
+              })
+              charIndex++
+            }
+          }
+        }
+
+        cellsRef.current = cells
+      }
+    },
+    // Rebuild when the underlying artist string changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [artists.join('|')]
+  )
 
   // Animation loop
   useEffect(() => {
@@ -134,8 +147,6 @@ export default function LogoSymbolCanvas() {
     const handleResize = () => buildGrid(canvas)
     window.addEventListener('resize', handleResize)
 
-    const BLUE = '#4E7DFE'
-    const WHITE = '#ffffff'
     const RADIUS = 90
     const GLOW_RADIUS = 50
 
@@ -148,7 +159,6 @@ export default function LogoSymbolCanvas() {
       ctx.scale(dpr, dpr)
       ctx.clearRect(0, 0, w, h)
 
-      // Draw glow circle under symbols
       if (mx > 0) {
         const grad = ctx.createRadialGradient(mx, my, 0, mx, my, GLOW_RADIUS)
         grad.addColorStop(0, 'rgba(78,125,254,0.18)')
@@ -167,39 +177,33 @@ export default function LogoSymbolCanvas() {
       for (let i = 0; i < cells.length; i++) {
         const cell = cells[i]
 
-        // Compute distance from mouse
         const dx = cell.x - mx
         const dy = cell.y - my
         const dist = Math.sqrt(dx * dx + dy * dy)
 
-        // Target lit value based on mouse proximity
         cell.target = dist < RADIUS ? Math.pow(1 - dist / RADIUS, 1.4) : 0
 
-        // Smooth lerp
         const speed = cell.target > cell.lit ? 0.22 : 0.06
         cell.lit += (cell.target - cell.lit) * speed
 
         const lit = cell.lit
 
-        // Interpolate color: dim white → bright blue
         let fillStyle: string
         let alpha: number
         if (lit > 0.01) {
-          // Blend toward blue
           const r = Math.round(255 + (78 - 255) * lit)
           const g = Math.round(255 + (125 - 255) * lit)
           const b = Math.round(255 + (254 - 255) * lit)
           alpha = cell.baseAlpha + lit * (1 - cell.baseAlpha)
           fillStyle = `rgb(${r},${g},${b})`
         } else {
-          fillStyle = WHITE
+          fillStyle = '#ffffff'
           alpha = cell.baseAlpha
         }
 
         ctx.globalAlpha = alpha
         ctx.fillStyle = fillStyle
 
-        // Slight scale up on lit cells
         if (lit > 0.05) {
           ctx.save()
           const scale = 1 + lit * 0.4
@@ -252,7 +256,7 @@ export default function LogoSymbolCanvas() {
     <canvas
       ref={canvasRef}
       className="w-full h-full block"
-      aria-label="MB Studio logo rendered in code symbols"
+      aria-label="MB Artists logo rendered in artist names"
       role="img"
     />
   )
