@@ -71,8 +71,8 @@ export default function AgentDetailView({ agent }: Props) {
           {/* LEFT — name + Connect & Contact + socials */}
           <div className="max-w-[680px]">
             <h1
-              className="font-bold tracking-tight mb-8 whitespace-nowrap overflow-hidden text-ellipsis"
-              style={{ fontSize: 'clamp(40px, 5vw, 72px)', lineHeight: 1, letterSpacing: '-0.02em' }}
+              className="font-bold tracking-tight mb-8 break-words"
+              style={{ fontSize: 'clamp(36px, 4.5vw, 64px)', lineHeight: 1.05, letterSpacing: '-0.02em' }}
             >
               {agent.name}
             </h1>
