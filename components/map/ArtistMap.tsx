@@ -118,6 +118,9 @@ export default function ArtistMap() {
   const mouseRef = useRef({ x: -9999, y: -9999 })
   const animRef = useRef<number>()
   const litRef = useRef<Map<number, number>>(new Map())
+  // Tracks the current viewport width category — set inside buildDots
+  // and used by the draw loop to pick dot sizes.
+  const isMobileRef = useRef(false)
 
   const regionData: Record<string, string[]> = {}
   SAMPLE_ARTISTS.forEach((a) => {
@@ -131,7 +134,11 @@ export default function ArtistMap() {
       // Guard against invalid dimensions
       if (width <= 0 || height <= 0) return
 
-      const DOT_SPACING = 6
+      // Smaller, denser dots on desktop. Slightly sparser on mobile but
+      // proportionally smaller too so the map doesn't feel chunky on phones.
+      const isMobile = width < 640
+      isMobileRef.current = isMobile
+      const DOT_SPACING = isMobile ? 5 : 6
 
       // Fetch world GeoJSON directly — no topojson-client needed
       const res = await fetch(
@@ -165,7 +172,6 @@ export default function ArtistMap() {
         const ring: number[][] = []
         arcIndices.forEach((arcIdx, idx) => {
           const decoded = decodeArc(arcIdx)
-          // Skip first point of subsequent arcs (it duplicates the last point of previous arc)
           const start = idx === 0 ? 0 : 1
           for (let i = start; i < decoded.length; i++) {
             ring.push(decoded[i])
@@ -288,7 +294,11 @@ export default function ArtistMap() {
 
       const mx = mouseRef.current.x
       const my = mouseRef.current.y
-      const RADIUS = 100
+      const RADIUS = isMobileRef.current ? 60 : 100
+
+      // Mobile dots are noticeably smaller so the map reads cleanly on phones
+      const baseR = isMobileRef.current ? 0.8 : 1.5
+      const litR = isMobileRef.current ? 0.8 : 1.5
 
       dotsRef.current.forEach((dot, i) => {
         const region = dot.region
@@ -308,7 +318,7 @@ export default function ArtistMap() {
         const r = Math.round(78 * intensity)
         const g = Math.round(125 * intensity)
         const b = Math.round(254 * intensity)
-        const dotR = 1.5 + next * 1.5
+        const dotR = baseR + next * litR
 
         ctx.beginPath()
         ctx.arc(dot.x, dot.y, dotR, 0, Math.PI * 2)
