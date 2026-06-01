@@ -7,14 +7,15 @@ import { usePathname } from "next/navigation"
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
-  { href: "/artists", label: "Our Roster" },
-  { href: "/academy", label: "Academy" },
-  { href: "/agents", label: "Our Team" },
+  { href: "/artists", label: "MB Artists" },
+  { href: "/academy", label: "MB Academy" },
+  { href: "/agents", label: "MB Agents" },
   { href: "/book", label: "Make An Enquiry" },
 ]
 
 const ACCENT = "#4E7DFE"
 const BAR_BG = "#272727"
+const SUPPORT_EMAIL = "support@mbartists.co.uk"
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -101,11 +102,11 @@ export default function Navigation() {
               </button>
             </div>
 
-            {/* Right — Make an Enquiry */}
+            {/* Right — Make an Enquiry (hidden on mobile; still available in menu) */}
             <div className="flex justify-end">
               <Link
                 href="/book"
-                className="font-mono text-[10px] md:text-xs tracking-widest uppercase px-3 md:px-4 py-2 border transition-all duration-200 whitespace-nowrap"
+                className="hidden md:inline-block font-mono text-[10px] md:text-xs tracking-widest uppercase px-3 md:px-4 py-2 border transition-all duration-200 whitespace-nowrap"
                 style={{
                   borderColor: ACCENT,
                   color: pathname === "/book" ? "#000" : ACCENT,
@@ -206,11 +207,11 @@ export default function Navigation() {
                     }}
                   >
                     <a
-                      href="mailto:support@mbartists.com"
+                      href={`mailto:${SUPPORT_EMAIL}`}
                       className="block font-mono text-sm transition-colors duration-200 hover:text-[#4E7DFE]"
                       style={{ color: "#aaa" }}
                     >
-                      support@mbartists.com
+                      {SUPPORT_EMAIL}
                     </a>
                     <p className="font-mono text-sm" style={{ color: "#666" }}>
                       London, UK
@@ -265,9 +266,9 @@ export default function Navigation() {
                 </div>
               </div>
 
-              {/* Bottom border accent */}
+              {/* Bottom border accent — "MB ARTISTS AGENCY   EST. 2009" */}
               <div
-                className="mt-8 md:mt-12 pt-6 border-t flex items-center justify-between"
+                className="mt-8 md:mt-12 pt-6 border-t"
                 style={{
                   borderColor: "#3a3a3a",
                   transform: isOpen ? "translateY(0)" : "translateY(20px)",
@@ -279,13 +280,7 @@ export default function Navigation() {
                   className="font-mono text-[10px] uppercase tracking-wider"
                   style={{ color: "#666" }}
                 >
-                  Artist Management Agency
-                </p>
-                <p
-                  className="font-mono text-[10px]"
-                  style={{ color: ACCENT }}
-                >
-                  Est. 2024
+                  MB Artists Agency&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Est. 2009
                 </p>
               </div>
             </div>
