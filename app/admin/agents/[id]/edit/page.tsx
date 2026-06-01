@@ -65,6 +65,7 @@ export default async function EditAgentPage({
           instagram: agent.instagram || '',
           linkedin: agent.linkedin || '',
           photoUrl: agent.photo_url,
+          photoFocusY: agent.photo_focus_y ?? 50,
         }}
       />
 
