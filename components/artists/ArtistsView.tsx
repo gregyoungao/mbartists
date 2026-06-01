@@ -9,6 +9,7 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([])
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [filtersOpen, setFiltersOpen] = useState(false) // start collapsed
   const gridRef = useRef<HTMLDivElement>(null)
 
   // Extract unique genres and locations from the live data
@@ -60,6 +61,8 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
     setSelectedLocations([])
   }
 
+  const activeFilterCount = selectedGenres.length + selectedLocations.length
+
   return (
     <>
       {/* Hero */}
@@ -89,82 +92,139 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
         </div>
       </section>
 
-      {/* Filters — only show if there are artists */}
+      {/* Filters — collapsible */}
       {artists.length > 0 && (
-        <section className="px-6 md:px-12 pb-8 sticky top-16 z-40 bg-black/90 backdrop-blur-md border-b border-white/5">
+        <section className="px-6 md:px-12 sticky top-16 z-40 bg-black/90 backdrop-blur-md border-b border-white/5">
           <div className="max-w-7xl mx-auto">
-            {/* Genre filters */}
-            {ALL_GENRES.length > 0 && (
-              <div className="mb-4">
-                <p
-                  className="font-mono text-[10px] tracking-widest uppercase mb-2"
-                  style={{ color: "#444" }}
+            {/* Toggle bar — always visible */}
+            <button
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className="w-full flex items-center justify-between py-4 group"
+              aria-expanded={filtersOpen}
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className="font-mono text-xs uppercase tracking-widest transition-colors duration-200 group-hover:text-[#4E7DFE]"
+                  style={{ color: filtersOpen ? "#4E7DFE" : "#888" }}
                 >
-                  Genres
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {ALL_GENRES.map((genre) => {
-                    const isActive = selectedGenres.includes(genre)
-                    return (
-                      <button
-                        key={genre}
-                        onClick={() => toggleGenre(genre)}
-                        className="font-mono text-xs px-3 py-1.5 border transition-all duration-200"
-                        style={{
-                          borderColor: isActive ? "#4E7DFE" : "#222",
-                          background: isActive ? "#4E7DFE" : "transparent",
-                          color: isActive ? "#000" : "#666",
-                        }}
-                      >
-                        {genre}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Location filters */}
-            <div className="flex flex-wrap items-center gap-4">
-              {ALL_LOCATIONS.length > 0 && (
-                <div className="flex-1">
-                  <p
-                    className="font-mono text-[10px] tracking-widest uppercase mb-2"
-                    style={{ color: "#444" }}
+                  Filters
+                </span>
+                {activeFilterCount > 0 && (
+                  <span
+                    className="font-mono text-[10px] px-2 py-0.5 rounded-full"
+                    style={{ background: "#4E7DFE", color: "#000" }}
                   >
-                    Locations
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {ALL_LOCATIONS.map((location) => {
-                      const isActive = selectedLocations.includes(location)
-                      return (
-                        <button
-                          key={location}
-                          onClick={() => toggleLocation(location)}
-                          className="font-mono text-xs px-3 py-1.5 border transition-all duration-200"
-                          style={{
-                            borderColor: isActive ? "#4E7DFE" : "#222",
-                            background: isActive ? "#4E7DFE" : "transparent",
-                            color: isActive ? "#000" : "#666",
-                          }}
-                        >
-                          {location}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
+                    {activeFilterCount}
+                  </span>
+                )}
+              </div>
 
-              {(selectedGenres.length > 0 || selectedLocations.length > 0) && (
-                <button
-                  onClick={clearFilters}
-                  className="font-mono text-xs px-4 py-2 transition-colors duration-200"
-                  style={{ color: "#4E7DFE" }}
+              <div className="flex items-center gap-3">
+                {activeFilterCount > 0 && (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      clearFilters()
+                    }}
+                    className="font-mono text-[10px] uppercase tracking-widest hover:text-[#4E7DFE] transition-colors cursor-pointer"
+                    style={{ color: "#666" }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        clearFilters()
+                      }
+                    }}
+                  >
+                    Clear
+                  </span>
+                )}
+                <span
+                  className="font-mono text-xs transition-transform duration-200"
+                  style={{
+                    color: filtersOpen ? "#4E7DFE" : "#888",
+                    transform: filtersOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                  aria-hidden
                 >
-                  Clear All
-                </button>
-              )}
+                  ▾
+                </span>
+              </div>
+            </button>
+
+            {/* Collapsible content */}
+            <div
+              className="overflow-hidden transition-[max-height,opacity] duration-300 ease-out"
+              style={{
+                maxHeight: filtersOpen ? "600px" : "0px",
+                opacity: filtersOpen ? 1 : 0,
+              }}
+            >
+              <div className="pb-6 space-y-4">
+                {/* Genre filters */}
+                {ALL_GENRES.length > 0 && (
+                  <div>
+                    <p
+                      className="font-mono text-[10px] tracking-widest uppercase mb-2"
+                      style={{ color: "#444" }}
+                    >
+                      Genres
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {ALL_GENRES.map((genre) => {
+                        const isActive = selectedGenres.includes(genre)
+                        return (
+                          <button
+                            key={genre}
+                            onClick={() => toggleGenre(genre)}
+                            className="font-mono text-xs px-3 py-1.5 border transition-all duration-200"
+                            style={{
+                              borderColor: isActive ? "#4E7DFE" : "#222",
+                              background: isActive ? "#4E7DFE" : "transparent",
+                              color: isActive ? "#000" : "#666",
+                            }}
+                          >
+                            {genre}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Location filters */}
+                {ALL_LOCATIONS.length > 0 && (
+                  <div>
+                    <p
+                      className="font-mono text-[10px] tracking-widest uppercase mb-2"
+                      style={{ color: "#444" }}
+                    >
+                      Locations
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {ALL_LOCATIONS.map((location) => {
+                        const isActive = selectedLocations.includes(location)
+                        return (
+                          <button
+                            key={location}
+                            onClick={() => toggleLocation(location)}
+                            className="font-mono text-xs px-3 py-1.5 border transition-all duration-200"
+                            style={{
+                              borderColor: isActive ? "#4E7DFE" : "#222",
+                              background: isActive ? "#4E7DFE" : "transparent",
+                              color: isActive ? "#000" : "#666",
+                            }}
+                          >
+                            {location}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
