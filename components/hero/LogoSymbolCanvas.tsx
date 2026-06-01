@@ -255,7 +255,7 @@ export default function LogoSymbolCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-full block"
+      className="w-full h-full block opacity-30 md:opacity-100"
       aria-label="MB Artists logo rendered in artist names"
       role="img"
     />
