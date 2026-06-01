@@ -3,13 +3,9 @@
 // =========================================================
 // components/agents/AgentDetailView.tsx
 // Renders the public agent profile:
-//   - Hero: photo + "All Agents" gray back button
-//   - Intro: name + // Connect & Contact + socials (LEFT)
-//            | bio (RIGHT)
-//   - Section divider
-//   - // Artist Roster grid (6-col responsive)
-//   - "View All Artists" button (centered, blue)
-// All hover effects via Tailwind CSS — no JS handlers needed.
+//   - Hero: photo + focal point + "All Agents" back button flush to corner
+//   - Margins match listing pages (px-6 md:px-12, max-w-7xl)
+//   - Artist roster grid styled to match /artists (square, hover-bright, blue glow)
 // =========================================================
 
 import Image from 'next/image'
@@ -45,29 +41,27 @@ export default function AgentDetailView({ agent }: Props) {
           priority
         />
 
-        {/* "All Agents" back button — bottom-left, gray */}
-        <div className="absolute bottom-8 left-8">
-          <Link
-            href="/agents"
-            className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest px-4 py-2.5 transition-colors duration-200 hover:bg-white"
-            style={{ background: '#d9d9d9', color: '#000' }}
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
-              <path
-                d="M9 3L3 9M3 3v6h6"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span>All Agents</span>
-          </Link>
-        </div>
+        {/* "All Agents" back button — flush to bottom-left corner */}
+        <Link
+          href="/agents"
+          className="absolute bottom-0 left-0 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest px-4 py-2.5 transition-colors duration-200 hover:bg-white"
+          style={{ background: '#d9d9d9', color: '#000' }}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+            <path
+              d="M9 3L3 9M3 3v6h6"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span>All Agents</span>
+        </Link>
       </section>
 
       {/* ───────── Intro: name + contact (LEFT) | bio (RIGHT) ───────── */}
-      <section className="px-20 max-w-[1280px] mx-auto pt-14 pb-16 border-b border-[#1a1a1a]">
+      <section className="px-6 md:px-12 max-w-7xl mx-auto pt-14 pb-16 border-b border-[#1a1a1a]">
         <div className="grid gap-12 items-start grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
           {/* LEFT — name + Connect & Contact + socials */}
           <div className="max-w-[680px]">
@@ -141,7 +135,7 @@ export default function AgentDetailView({ agent }: Props) {
       </section>
 
       {/* ───────── Artist Roster ───────── */}
-      <section className="px-20 max-w-[1280px] mx-auto pt-14 pb-24">
+      <section className="px-6 md:px-12 max-w-7xl mx-auto pt-14 pb-24">
         <p
           className="font-mono text-xs tracking-widest uppercase mb-7"
           style={{ color: '#4E7DFE' }}
@@ -154,65 +148,74 @@ export default function AgentDetailView({ agent }: Props) {
             No artists yet.
           </p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-5">
+          /* Grid mirrors /artists styling: square aspect, gap-1, brightness on hover */
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1">
             {agent.roster.map((artist) => (
               <Link
                 key={artist.slug}
                 href={`/artists/${artist.slug}`}
-                className="group block"
+                className="group relative aspect-square overflow-hidden block bg-[#050505] hover:bg-[#0a0a0a]"
               >
-                <div className="relative aspect-[3/4] overflow-hidden bg-[#0a0a0a] transition-shadow duration-300 group-hover:shadow-[0_0_30px_rgba(78,125,254,0.3)]">
-                  {artist.image && artist.image !== '/placeholder-artist.jpg' ? (
-                    <Image
-                      src={artist.image}
-                      alt={artist.name}
-                      fill
-                      className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
-                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 200px"
-                    />
-                  ) : (
-                    <div
-                      className="absolute inset-0 flex items-center justify-center font-mono text-xl"
-                      style={{
-                        background:
-                          'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #2a2a2a 100%)',
-                        color: '#444',
-                      }}
-                    >
-                      {initials(artist.name)}
-                    </div>
-                  )}
-
-                  {/* Bottom gradient for legibility */}
+                {artist.image && artist.image !== '/placeholder-artist.jpg' ? (
+                  <Image
+                    src={artist.image}
+                    alt={artist.name}
+                    fill
+                    className="object-cover transition-all duration-500 brightness-75 group-hover:brightness-110 group-hover:scale-105"
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 220px"
+                  />
+                ) : (
                   <div
-                    className="absolute inset-0 pointer-events-none"
+                    className="absolute inset-0 flex items-center justify-center font-mono text-xl"
                     style={{
                       background:
-                        'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%)',
+                        'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #2a2a2a 100%)',
+                      color: '#444',
                     }}
-                  />
+                  >
+                    {initials(artist.name)}
+                  </div>
+                )}
 
-                  {/* Corner accents on hover */}
-                  <span className="absolute top-2 left-2 w-3.5 h-3.5 border-t-2 border-l-2 border-transparent group-hover:border-[#4E7DFE] transition-colors duration-300" />
-                  <span className="absolute top-2 right-2 w-3.5 h-3.5 border-t-2 border-r-2 border-transparent group-hover:border-[#4E7DFE] transition-colors duration-300" />
-                  <span className="absolute bottom-2 left-2 w-3.5 h-3.5 border-b-2 border-l-2 border-transparent group-hover:border-[#4E7DFE] transition-colors duration-300" />
-                  <span className="absolute bottom-2 right-2 w-3.5 h-3.5 border-b-2 border-r-2 border-transparent group-hover:border-[#4E7DFE] transition-colors duration-300" />
+                {/* Bottom gradient for legibility */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background:
+                      'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%)',
+                  }}
+                />
 
-                  {/* Name + genre overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-                    <div className="font-bold text-sm leading-tight text-white mb-1">
-                      {artist.name}
-                    </div>
-                    {artist.genres[0] && (
-                      <div
-                        className="font-mono uppercase tracking-[0.15em]"
-                        style={{ fontSize: '10px', color: '#4E7DFE' }}
+                {/* Blue glow on hover */}
+                <div
+                  className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{
+                    background:
+                      'radial-gradient(circle at 50% 50%, rgba(78, 125, 254, 0.15) 0%, transparent 70%)',
+                  }}
+                />
+
+                {/* Artist info */}
+                <div className="absolute inset-0 flex flex-col justify-end p-3 z-10">
+                  <h3 className="font-bold text-sm md:text-base truncate text-[#888] group-hover:text-white transition-colors duration-300">
+                    {artist.name}
+                  </h3>
+
+                  {/* Show genre on hover */}
+                  {artist.genres[0] && (
+                    <div className="mt-1 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                      <span
+                        className="font-mono text-[9px] tracking-wider uppercase"
+                        style={{ color: '#4E7DFE' }}
                       >
                         {artist.genres[0]}
-                      </div>
-                    )}
-                  </div>
+                      </span>
+                    </div>
+                  )}
                 </div>
+
+                {/* Corner accent — top right only, like /artists */}
+                <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-transparent group-hover:border-[#4E7DFE] transition-colors duration-300" />
               </Link>
             ))}
           </div>
