@@ -69,11 +69,11 @@ export default async function BookPage({
                     General Enquiries
                   </p>
                   <a
-                    href="mailto:support@mbartists.com"
+                    href="mailto:support@mbartists.co.uk"
                     className="font-mono text-sm transition-colors hover:text-[#4E7DFE]"
                     style={{ color: '#0a0a0a' }}
                   >
-                    SUPPORT@MBARTISTS.COM
+                    SUPPORT@MBARTISTS.CO.UK
                   </a>
                 </div>
 
