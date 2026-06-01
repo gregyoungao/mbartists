@@ -37,7 +37,7 @@ export default async function BookPage({
     <main className="min-h-screen" style={{ background: '#ffffff', color: '#0a0a0a' }}>
       <Navigation />
 
-      <div className="pt-32 pb-20 px-6 md:px-12">
+      <div className="pt-32 pb-20 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
             {/* Left column — heading + contact info */}

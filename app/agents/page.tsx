@@ -9,6 +9,7 @@ import Link from 'next/link'
 import Navigation from '@/components/nav/Navigation'
 import Footer from '@/components/nav/Footer'
 import { getServiceClient } from '@/lib/supabase'
+import { getRoleLabel } from '@/lib/roles'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,7 +53,7 @@ export default async function AgentsPage() {
       <Navigation />
 
       {/* Title section — mirrors the artist roster header style */}
-      <section className="px-20 max-w-[1280px] mx-auto pt-32 pb-16">
+      <section className="px-4 md:px-8 max-w-7xl mx-auto pt-32 pb-16">
         <p
           className="font-mono text-xs tracking-widest uppercase mb-4"
           style={{ color: '#4E7DFE' }}
@@ -71,7 +72,7 @@ export default async function AgentsPage() {
       </section>
 
       {/* 6-column agent grid */}
-      <section className="px-20 max-w-[1280px] mx-auto pb-24">
+      <section className="px-4 md:px-8 max-w-7xl mx-auto pb-24">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-5">
           {agents.map((agent) => (
             <Link
@@ -128,7 +129,7 @@ export default async function AgentsPage() {
                       className="font-mono uppercase tracking-[0.15em]"
                       style={{ fontSize: '10px', color: '#4E7DFE' }}
                     >
-                      {agent.role}
+                      {getRoleLabel(agent.role)}
                     </div>
                   )}
                 </div>

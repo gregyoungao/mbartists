@@ -41,7 +41,7 @@ export default function Footer() {
       </div>
 
       {/* Content layer — sits on top of watermark */}
-      <div className="relative z-10 px-6 md:px-12 py-12 max-w-7xl mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-12 max-w-7xl mx-auto">
         {/* Contact + Follow row — centered, on top */}
         <div className="flex flex-col items-center gap-8 mb-12">
           <div className="text-center">

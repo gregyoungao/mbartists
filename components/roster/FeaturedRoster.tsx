@@ -5,7 +5,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { Golos_Text } from "next/font/google"
 
-// Golos Text loaded only in this component — won't affect the rest of the site
 const golos = Golos_Text({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
@@ -21,7 +20,6 @@ interface FeaturedArtist {
 
 interface FeaturedRosterProps {
   artists: FeaturedArtist[]
-  // Optional — defaults preserve the "Our Roster" section (no eyebrow by default)
   title?: string
   eyebrow?: string
   tagline?: string
@@ -39,7 +37,7 @@ const DEFAULT_TAGLINE =
 export default function FeaturedRoster({
   artists,
   title = "Our Roster",
-  eyebrow = "", // default: no eyebrow (Academy passes its own)
+  eyebrow = "",
   tagline = DEFAULT_TAGLINE,
   bg = "#d9d9d9",
 }: FeaturedRosterProps) {
@@ -49,16 +47,9 @@ export default function FeaturedRoster({
     return null
   }
 
-  // Duplicate the list so the scroll wraps seamlessly (no jump back to start).
   const loopedArtists = [...artists, ...artists]
-
-  // Slower pace: ~5s per card width, with a 35s floor for short rosters
   const durationSec = Math.max(35, artists.length * 5)
-
-  // Animation pauses only when a specific card is hovered, not the whole section
   const isPaused = hoveredIndex !== null
-
-  // Unique keyframe name per section so two instances don't collide
   const animName = `mb-roster-scroll-${title.replace(/[^a-z0-9]/gi, "").toLowerCase()}`
 
   return (
@@ -74,7 +65,7 @@ export default function FeaturedRoster({
       `}</style>
 
       {/* Section header — centered */}
-      <div className="px-6 md:px-12 mb-12 text-center">
+      <div className="px-4 md:px-8 mb-12 text-center">
         {eyebrow && (
           <p
             className="font-mono text-xs tracking-widest uppercase mb-3"
@@ -134,7 +125,6 @@ export default function FeaturedRoster({
                   }}
                 />
 
-                {/* Overlay gradient — only when hovered, to make name readable */}
                 <div
                   className="absolute inset-0 transition-opacity duration-300"
                   style={{
@@ -144,7 +134,6 @@ export default function FeaturedRoster({
                   }}
                 />
 
-                {/* Corner accents on hover */}
                 <div
                   className="absolute top-3 left-3 w-4 h-4 transition-all duration-300"
                   style={{
@@ -190,7 +179,6 @@ export default function FeaturedRoster({
                   }}
                 />
 
-                {/* Artist name — only visible on hover, fades in/out */}
                 <div
                   className="absolute bottom-0 left-0 right-0 p-4 transition-opacity duration-300"
                   style={{ opacity: hoveredIndex === index ? 1 : 0 }}
@@ -209,7 +197,7 @@ export default function FeaturedRoster({
       </div>
 
       {/* Tagline + CTA — centered below the row */}
-      <div className="px-6 md:px-12 mt-10 text-center">
+      <div className="px-4 md:px-8 mt-10 text-center">
         <p
           className="max-w-2xl mx-auto mb-6 text-sm md:text-base"
           style={{ color: "#444" }}

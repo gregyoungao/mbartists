@@ -2,7 +2,7 @@
 // app/artists/[slug]/page.tsx
 // Artist profile page
 //   - Hero: image w/ focal point + "All Artists" button flush to corner
-//   - Margins match listing pages: px-6 md:px-12, max-w-7xl
+//   - Margins match listing pages: px-4 md:px-8, max-w-7xl
 //   - Primary genre always sorts first in chip row
 // =========================================================
 
@@ -79,7 +79,7 @@ export default async function ArtistPage({
         </section>
 
         {/* ───────── Intro (name | small bio) ───────── */}
-        <section className="px-6 md:px-12 max-w-7xl mx-auto pt-14 pb-16 border-b border-[#1a1a1a]">
+        <section className="px-4 md:px-8 max-w-7xl mx-auto pt-14 pb-16 border-b border-[#1a1a1a]">
           <div className="grid gap-12 items-start grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
             {/* Left — name + chips + socials */}
             <div className="max-w-[680px]">
@@ -159,7 +159,7 @@ export default async function ArtistPage({
         </section>
 
         {/* ───────── Bio + Agents ───────── */}
-        <section className="px-6 md:px-12 max-w-7xl mx-auto pt-14 pb-16">
+        <section className="px-4 md:px-8 max-w-7xl mx-auto pt-14 pb-16">
           <div className="grid gap-12 items-start mb-20 grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
             {/* Left — Biography */}
             <div>

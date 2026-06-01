@@ -23,13 +23,13 @@ export default function HeroSection() {
   return (
     <section
       className="relative w-full overflow-hidden"
-      style={{ height: '100dvh', minHeight: '600px', background: '#000', cursor: 'none' }}
+      style={{ height: '100dvh', minHeight: '600px', background: '#000' }}
       aria-label="Hero section"
     >
-      {/* Custom cursor */}
+      {/* Custom cursor — hidden on mobile (no mouse, prevents stuck blue dot in top-left) */}
       <div
         ref={cursorRef}
-        className="fixed pointer-events-none z-50 rounded-full"
+        className="fixed pointer-events-none z-50 rounded-full hidden md:block"
         style={{
           width: '8px',
           height: '8px',
@@ -47,63 +47,73 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Overlay content — heading + CTAs */}
-      <div className="absolute inset-0 z-20 flex items-center pointer-events-none">
-        <div className="w-full px-6 md:px-12 lg:px-20">
-          <div className="max-w-3xl">
-            <h1
-              className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 leading-[0.95]"
-              style={{ color: '#fff' }}
-            >
-              Giving artists the
-              <br />
-              <span style={{ color: '#fff' }}>MAXIMUM</span>
-            </h1>
-            <p
-              className="text-base md:text-lg max-w-xl mb-10"
-              style={{ color: 'rgba(255,255,255,0.7)' }}
-            >
-              Offering the hottest talent the global music scene has to offer.
-              Securing the future of artists worldwide.
-            </p>
-
-            <div className="flex flex-wrap gap-4 pointer-events-auto">
-              <Link
-                href="/artists"
-                className="font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200"
+      {/* Overlay content — heading + CTAs.
+          Padding matches the navigation bar's outer edge (px-4 md:px-8).
+          Section itself uses md:cursor-none so the custom cursor only takes
+          over on desktop where it actually exists. */}
+      <div
+        className="absolute inset-0 z-20 flex items-center pointer-events-none md:[cursor:none]"
+      >
+        <div className="w-full px-4 md:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-3xl">
+              <h1
+                className="font-bold tracking-tight mb-6"
                 style={{
-                  background: '#4E7DFE',
-                  color: '#000',
-                  cursor: 'none',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#6B92FF'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#4E7DFE'
-                }}
-              >
-                View Our Roster
-              </Link>
-              <Link
-                href="/agents"
-                className="font-mono text-xs uppercase tracking-widest px-6 py-3 border transition-all duration-200"
-                style={{
-                  borderColor: '#fff',
+                  // Fluid sizing — keeps "Giving artists the" on one line at mobile widths
+                  fontSize: 'clamp(32px, 7vw, 96px)',
+                  lineHeight: 0.95,
                   color: '#fff',
-                  cursor: 'none',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#fff'
-                  e.currentTarget.style.color = '#000'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.color = '#fff'
                 }}
               >
-                View Our Team
-              </Link>
+                Giving artists the
+                <br />
+                <span style={{ color: '#fff' }}>MAXIMUM</span>
+              </h1>
+              <p
+                className="text-base md:text-lg max-w-xl mb-10"
+                style={{ color: 'rgba(255,255,255,0.7)' }}
+              >
+                Offering the hottest talent the global music scene has to offer.
+                Securing the future of artists worldwide.
+              </p>
+
+              <div className="flex flex-wrap gap-4 pointer-events-auto">
+                <Link
+                  href="/artists"
+                  className="font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200 md:[cursor:none]"
+                  style={{
+                    background: '#4E7DFE',
+                    color: '#000',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#6B92FF'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#4E7DFE'
+                  }}
+                >
+                  View Our Roster
+                </Link>
+                <Link
+                  href="/agents"
+                  className="font-mono text-xs uppercase tracking-widest px-6 py-3 border transition-all duration-200 md:[cursor:none]"
+                  style={{
+                    borderColor: '#fff',
+                    color: '#fff',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#fff'
+                    e.currentTarget.style.color = '#000'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.color = '#fff'
+                  }}
+                >
+                  View Our Team
+                </Link>
+              </div>
             </div>
           </div>
         </div>

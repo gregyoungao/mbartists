@@ -81,7 +81,7 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
   return (
     <>
       {/* Hero */}
-      <section className="pt-32 pb-16 px-6 md:px-12 relative overflow-hidden">
+      <section className="pt-32 pb-16 px-4 md:px-8 relative overflow-hidden">
         {/* Background glow following cursor */}
         <div
           className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
@@ -109,7 +109,7 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
 
       {/* Filters — collapsible */}
       {artists.length > 0 && (
-        <section className="px-6 md:px-12 sticky top-16 z-40 bg-black/90 backdrop-blur-md border-b border-white/5">
+        <section className="px-4 md:px-8 sticky top-16 z-40 bg-black/90 backdrop-blur-md border-b border-white/5">
           <div className="max-w-7xl mx-auto">
             {/* Toggle bar — always visible */}
             <button
@@ -246,7 +246,7 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
       )}
 
       {/* Artist Grid */}
-      <section className="px-6 md:px-12 py-12">
+      <section className="px-4 md:px-8 py-12">
         <div ref={gridRef} className="max-w-7xl mx-auto">
           {/* Empty state — no artists at all */}
           {artists.length === 0 ? (
@@ -380,7 +380,7 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
       </section>
 
       {/* Footer stats */}
-      <section className="px-6 md:px-12 py-8 border-t" style={{ borderColor: "#111" }}>
+      <section className="px-4 md:px-8 py-8 border-t" style={{ borderColor: "#111" }}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <p className="font-mono text-xs" style={{ color: "#333" }}>
             Showing{" "}

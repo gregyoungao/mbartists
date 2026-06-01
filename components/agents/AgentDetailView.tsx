@@ -4,7 +4,7 @@
 // components/agents/AgentDetailView.tsx
 // Renders the public agent profile:
 //   - Hero: photo + focal point + "All Agents" back button flush to corner
-//   - Margins match listing pages (px-6 md:px-12, max-w-7xl)
+//   - Margins match listing pages (px-4 md:px-8, max-w-7xl)
 //   - Artist roster grid styled to match /artists (square, hover-bright, blue glow)
 // =========================================================
 
@@ -61,7 +61,7 @@ export default function AgentDetailView({ agent }: Props) {
       </section>
 
       {/* ───────── Intro: name + contact (LEFT) | bio (RIGHT) ───────── */}
-      <section className="px-6 md:px-12 max-w-7xl mx-auto pt-14 pb-16 border-b border-[#1a1a1a]">
+      <section className="px-4 md:px-8 max-w-7xl mx-auto pt-14 pb-16 border-b border-[#1a1a1a]">
         <div className="grid gap-12 items-start grid-cols-1 lg:grid-cols-[minmax(0,680px)_1fr]">
           {/* LEFT — name + Connect & Contact + socials */}
           <div className="max-w-[680px]">
@@ -135,7 +135,7 @@ export default function AgentDetailView({ agent }: Props) {
       </section>
 
       {/* ───────── Artist Roster ───────── */}
-      <section className="px-6 md:px-12 max-w-7xl mx-auto pt-14 pb-24">
+      <section className="px-4 md:px-8 max-w-7xl mx-auto pt-14 pb-24">
         <p
           className="font-mono text-xs tracking-widest uppercase mb-7"
           style={{ color: '#4E7DFE' }}
