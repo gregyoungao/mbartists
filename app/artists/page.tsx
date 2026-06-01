@@ -1,7 +1,7 @@
 // =========================================================
-// /artists — public artists listing
-// Server component: fetches all non-archived artists from Supabase,
-// passes them to the client ArtistsView for filtering.
+// /artists — public roster listing
+// Server component: fetches non-archived artists with their
+// primary genre, all genres, and locations, then passes to ArtistsView.
 // =========================================================
 
 import Navigation from '@/components/nav/Navigation'
@@ -15,7 +15,10 @@ export interface PublicArtist {
   slug: string
   name: string
   image: string
+  /** Names of all genres assigned to the artist */
   genres: string[]
+  /** Name of the artist's PRIMARY genre, or null if not set */
+  primaryGenre: string | null
   locations: string[]
 }
 
@@ -25,8 +28,8 @@ async function getArtists(): Promise<PublicArtist[]> {
   const { data, error } = await supabase
     .from('artists')
     .select(`
-      slug, name, image_url,
-      artist_genres ( genres ( name ) ),
+      slug, name, image_url, primary_genre_id,
+      artist_genres ( genres ( id, name ) ),
       artist_locations ( locations ( name ) )
     `)
     .eq('archived', false)
@@ -34,17 +37,27 @@ async function getArtists(): Promise<PublicArtist[]> {
 
   if (error || !data) return []
 
-  return data.map((a: any) => ({
-    slug: a.slug,
-    name: a.name,
-    image: a.image_url || '/placeholder-artist.jpg',
-    genres: (a.artist_genres || [])
-      .map((ag: any) => ag.genres?.name)
-      .filter(Boolean),
-    locations: (a.artist_locations || [])
-      .map((al: any) => al.locations?.name)
-      .filter(Boolean),
-  }))
+  return data.map((a: any) => {
+    const allGenres: { id: string; name: string }[] = (a.artist_genres || [])
+      .map((ag: any) => ag.genres)
+      .filter(Boolean)
+
+    const primary =
+      a.primary_genre_id
+        ? allGenres.find((g) => g.id === a.primary_genre_id) || null
+        : null
+
+    return {
+      slug: a.slug,
+      name: a.name,
+      image: a.image_url || '/placeholder-artist.jpg',
+      genres: allGenres.map((g) => g.name),
+      primaryGenre: primary?.name ?? null,
+      locations: (a.artist_locations || [])
+        .map((al: any) => al.locations?.name)
+        .filter(Boolean),
+    }
+  })
 }
 
 export default async function ArtistsPage() {

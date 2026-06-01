@@ -79,6 +79,7 @@ export default async function EditArtistPage({
           spotlight4: artist.spotlight_4 || '',
           imageUrl: artist.image_url,
           imageFocusY: artist.image_focus_y ?? 50,
+          primaryGenreId: artist.primary_genre_id || '',
           selectedGenres: (artist.artist_genres || []).map((g: any) => g.genre_id),
           selectedLocations: (artist.artist_locations || []).map((l: any) => l.location_id),
         }}

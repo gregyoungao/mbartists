@@ -112,6 +112,20 @@ export async function POST(req: Request) {
       }
     }
 
+    // Genre IDs come in as a JSON array from the form
+    const genreIds: string[] = JSON.parse(String(fd.get('genres') || '[]'))
+
+    // Primary genre — must be one of the selected genres, otherwise null
+    let primary_genre_id: string | null = String(fd.get('primaryGenreId') || '').trim() || null
+    if (primary_genre_id && !genreIds.includes(primary_genre_id)) {
+      // Frontend should prevent this, but be defensive on the server too
+      primary_genre_id = null
+    }
+    // If exactly one genre is selected, auto-assign it as primary
+    if (!primary_genre_id && genreIds.length === 1) {
+      primary_genre_id = genreIds[0]
+    }
+
     const payload = {
       slug: slug!,
       name,
@@ -119,6 +133,7 @@ export async function POST(req: Request) {
       image_focus_y,
       primary_agent_id: primaryAgentId,
       secondary_agent_id: secondaryAgentId,
+      primary_genre_id,
       small_bio: String(fd.get('smallBio') || '').trim() || null,
       large_bio: String(fd.get('largeBio') || '').trim() || null,
       academy_artist: fd.get('academyArtist') === 'true',
@@ -153,7 +168,6 @@ export async function POST(req: Request) {
     }
 
     // Replace genre + location associations
-    const genreIds: string[] = JSON.parse(String(fd.get('genres') || '[]'))
     const locationIds: string[] = JSON.parse(String(fd.get('locations') || '[]'))
 
     await supabase.from('artist_genres').delete().eq('artist_id', savedId)

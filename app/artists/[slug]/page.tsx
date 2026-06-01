@@ -40,8 +40,17 @@ export default async function ArtistPage({
   const tracks = spotlights.map((url, i) => ({ url, title: `Track ${i + 1}` }))
 
   // Vertical focal point for the hero image (0 = top, 50 = center, 100 = bottom).
-  // Falls back to center (50) for older artists that don't have the column set.
   const focusY = (artist as any).image_focus_y ?? 50
+
+  // Reorder genres so the artist's primary genre appears first (Style 3).
+  // Falls back to natural order if no primary is set.
+  const primaryGenreId = (artist as any).primary_genre_id ?? null
+  const sortedGenres = primaryGenreId
+    ? [
+        ...artist.genres.filter((g) => g.id === primaryGenreId),
+        ...artist.genres.filter((g) => g.id !== primaryGenreId),
+      ]
+    : artist.genres
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
@@ -80,15 +89,15 @@ export default async function ArtistPage({
             {/* Left — name + chips + socials */}
             <div className="max-w-[680px]">
               <h1
-                className="font-bold tracking-tight mb-6 whitespace-nowrap overflow-hidden text-ellipsis"
-                style={{ fontSize: 'clamp(40px, 5vw, 72px)', lineHeight: 1, letterSpacing: '-0.02em' }}
+                className="font-bold tracking-tight mb-6 break-words"
+                style={{ fontSize: 'clamp(36px, 4.5vw, 64px)', lineHeight: 1.05, letterSpacing: '-0.02em' }}
               >
                 {artist.name}
               </h1>
 
-              {(artist.genres.length > 0 || artist.locations.length > 0) && (
+              {(sortedGenres.length > 0 || artist.locations.length > 0) && (
                 <div className="flex flex-wrap gap-2 mb-7">
-                  {artist.genres.map((g) => (
+                  {sortedGenres.map((g) => (
                     <span
                       key={g.id}
                       className="font-mono text-[10px] px-3 py-1 uppercase tracking-wider border"
@@ -151,7 +160,6 @@ export default async function ArtistPage({
               <h2 className="font-mono text-xs tracking-widest uppercase mb-6" style={{ color: '#4E7DFE' }}>
                 {'// Biography'}
               </h2>
-              {/* Text constrained to 476px (30% narrower than column) */}
               <div className="space-y-3 max-w-[476px]">
                 {(artist.large_bio || '').split('\n\n').map((p, i) => (
                   <p key={i} style={{ fontSize: '14px', lineHeight: '1.65', color: '#aaa' }}>
@@ -182,7 +190,6 @@ export default async function ArtistPage({
                 )}
               </div>
 
-              {/* Make an Enquiry — pure CSS hover so this can stay in a server component */}
               <Link
                 href={`/book?artist=${artist.id}`}
                 className="inline-flex items-center gap-3 self-start font-mono text-xs uppercase tracking-widest px-6 py-3.5 transition-all duration-200
@@ -213,7 +220,6 @@ export default async function ArtistPage({
   )
 }
 
-/** Compact agent block — label, name (single line), email */
 function AgentBlock({
   label,
   name,
@@ -252,7 +258,6 @@ function AgentBlock({
   )
 }
 
-/** Social icon — only renders if href is provided; hovers to blue */
 function SocialIcon({
   href,
   label,

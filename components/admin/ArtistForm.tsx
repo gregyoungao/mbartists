@@ -27,6 +27,8 @@ interface ArtistFormInitial {
   /** Vertical focal point 0-100 (0 = top, 50 = center, 100 = bottom) */
   imageFocusY?: number
   selectedGenres: string[]
+  /** ID of the genre marked as primary. Must be one of selectedGenres. */
+  primaryGenreId?: string
   selectedLocations: string[]
 }
 
@@ -70,11 +72,11 @@ export default function ArtistForm({
   const [imageFile, setImageFile] = useState<File | null>(null)
   const existingImageUrl = initial.imageUrl || null
 
-  // Focal point: 0 = top, 50 = center, 100 = bottom. Default 50.
   const [imageFocusY, setImageFocusY] = useState<number>(initial.imageFocusY ?? 50)
   const [newFilePreviewUrl, setNewFilePreviewUrl] = useState<string | null>(null)
 
   const [selectedGenres, setSelectedGenres] = useState<string[]>(initial.selectedGenres || [])
+  const [primaryGenreId, setPrimaryGenreId] = useState<string>(initial.primaryGenreId || '')
   const [selectedLocations, setSelectedLocations] = useState<string[]>(initial.selectedLocations || [])
 
   const [submitting, setSubmitting] = useState(false)
@@ -93,6 +95,24 @@ export default function ArtistForm({
 
   const previewSrc = newFilePreviewUrl || existingImageUrl
 
+  // Keep primaryGenreId valid: if the chosen primary is removed from the
+  // selected genres, clear it. If exactly one genre is selected, auto-pick it.
+  useEffect(() => {
+    if (selectedGenres.length === 0) {
+      if (primaryGenreId) setPrimaryGenreId('')
+      return
+    }
+    if (selectedGenres.length === 1) {
+      // Auto-assign the lone genre as primary
+      if (primaryGenreId !== selectedGenres[0]) setPrimaryGenreId(selectedGenres[0])
+      return
+    }
+    // Multiple selected: if the current primary isn't among them anymore, clear it
+    if (primaryGenreId && !selectedGenres.includes(primaryGenreId)) {
+      setPrimaryGenreId('')
+    }
+  }, [selectedGenres, primaryGenreId])
+
   const toggleGenre = (id: string) => {
     setSelectedGenres((prev) =>
       prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
@@ -105,6 +125,9 @@ export default function ArtistForm({
   }
 
   const primaryAgentName = agents.find((a) => a.id === primaryAgentId)?.name || ''
+
+  // Genre objects matching currently-selected IDs (for primary radio)
+  const selectedGenreObjects = genres.filter((g) => selectedGenres.includes(g.id))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -120,6 +143,10 @@ export default function ArtistForm({
     }
     if (!primaryAgentId) {
       setError('Primary agent is required.')
+      return
+    }
+    if (selectedGenres.length > 1 && !primaryGenreId) {
+      setError('Please pick which genre is the artist’s primary.')
       return
     }
 
@@ -146,6 +173,7 @@ export default function ArtistForm({
       fd.append('spotlight4', spotlight4)
       fd.append('imageFocusY', String(imageFocusY))
       fd.append('genres', JSON.stringify(selectedGenres))
+      fd.append('primaryGenreId', primaryGenreId)
       fd.append('locations', JSON.stringify(selectedLocations))
       if (imageFile) fd.append('image', imageFile)
 
@@ -269,9 +297,39 @@ export default function ArtistForm({
         <Select value={secondaryAgentId} onChange={setSecondaryAgentId} options={agents} placeholder="(Optional)" />
       </Field>
 
-      <Field label="Genres *">
+      <Field label="Genres *" hint="Tap to add genres this artist plays.">
         <ChipPicker options={genres} selected={selectedGenres} onToggle={toggleGenre} />
       </Field>
+
+      {/* Primary Genre — only shown when 2+ genres are selected.
+          When exactly 1 is selected, it auto-becomes primary. */}
+      {selectedGenres.length > 1 && (
+        <Field
+          label="Primary Genre *"
+          hint="Pick which of the genres above is the artist’s strongest fit. Used for filtering and as the headline tag on their profile."
+        >
+          <div className="flex flex-wrap gap-2">
+            {selectedGenreObjects.map((g) => {
+              const isPrimary = primaryGenreId === g.id
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => setPrimaryGenreId(g.id)}
+                  className="font-mono text-xs px-3 py-1.5 border transition-all"
+                  style={{
+                    borderColor: isPrimary ? '#4E7DFE' : '#222',
+                    background: isPrimary ? '#4E7DFE' : 'transparent',
+                    color: isPrimary ? '#000' : '#888',
+                  }}
+                >
+                  {g.name}
+                </button>
+              )
+            })}
+          </div>
+        </Field>
+      )}
 
       <Field label="Locations *">
         <ChipPicker options={locations} selected={selectedLocations} onToggle={toggleLocation} />

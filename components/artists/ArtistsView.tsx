@@ -12,20 +12,29 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
   const [filtersOpen, setFiltersOpen] = useState(false) // start collapsed
   const gridRef = useRef<HTMLDivElement>(null)
 
-  // Extract unique genres and locations from the live data
+  // Build the list of genres to show as filter chips from artists' PRIMARY
+  // genres only. This makes the filter set smaller and meaningful (only
+  // genres that are someone's primary appear). Locations stay all-inclusive.
   const ALL_GENRES = Array.from(
-    new Set(artists.flatMap((a) => a.genres))
+    new Set(
+      artists
+        .map((a) => a.primaryGenre)
+        .filter((g): g is string => Boolean(g))
+    )
   ).sort()
+
   const ALL_LOCATIONS = Array.from(
     new Set(artists.flatMap((a) => a.locations))
   ).sort()
 
-  // Filter artists
+  // Filter artists — genre filter matches PRIMARY only (C-1).
+  // Locations still use "artist tagged with at least one selected location".
   const filteredArtists = artists
     .filter((artist) => {
       const genreMatch =
         selectedGenres.length === 0 ||
-        artist.genres.some((g) => selectedGenres.includes(g))
+        (artist.primaryGenre !== null &&
+          selectedGenres.includes(artist.primaryGenre))
       const locationMatch =
         selectedLocations.length === 0 ||
         artist.locations.some((l) => selectedLocations.includes(l))
@@ -163,14 +172,14 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
               }}
             >
               <div className="pb-6 space-y-4">
-                {/* Genre filters */}
+                {/* Genre filters — drawn from primary genres only */}
                 {ALL_GENRES.length > 0 && (
                   <div>
                     <p
                       className="font-mono text-[10px] tracking-widest uppercase mb-2"
                       style={{ color: "#444" }}
                     >
-                      Genres
+                      Primary Genre
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {ALL_GENRES.map((genre) => {
@@ -306,7 +315,7 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
                         {artist.name}
                       </h3>
 
-                      {/* Show genres on hover */}
+                      {/* Show primary genre first on hover, then up to 1 more */}
                       <div
                         className="flex flex-wrap gap-1 mt-1 transition-all duration-300"
                         style={{
@@ -317,15 +326,25 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
                               : "translateY(8px)",
                         }}
                       >
-                        {artist.genres.slice(0, 2).map((genre) => (
-                          <span
-                            key={genre}
-                            className="font-mono text-[9px] tracking-wider uppercase"
-                            style={{ color: "#4E7DFE" }}
-                          >
-                            {genre}
-                          </span>
-                        ))}
+                        {(() => {
+                          const ordered = artist.primaryGenre
+                            ? [
+                                artist.primaryGenre,
+                                ...artist.genres.filter(
+                                  (g) => g !== artist.primaryGenre
+                                ),
+                              ]
+                            : artist.genres
+                          return ordered.slice(0, 2).map((genre) => (
+                            <span
+                              key={genre}
+                              className="font-mono text-[9px] tracking-wider uppercase"
+                              style={{ color: "#4E7DFE" }}
+                            >
+                              {genre}
+                            </span>
+                          ))
+                        })()}
                       </div>
                     </div>
 
