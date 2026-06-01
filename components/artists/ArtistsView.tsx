@@ -9,32 +9,26 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([])
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  const [filtersOpen, setFiltersOpen] = useState(false) // start collapsed
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const gridRef = useRef<HTMLDivElement>(null)
 
-  // Build the list of genres to show as filter chips from artists' PRIMARY
-  // genres only. This makes the filter set smaller and meaningful (only
-  // genres that are someone's primary appear). Locations stay all-inclusive.
+  // Genre filter chips include ALL genres assigned to any artist (primary OR
+  // secondary). Filtering matches if any of the artist's genres is selected.
+  // The "primary" concept still drives display order on the card chips.
   const ALL_GENRES = Array.from(
-    new Set(
-      artists
-        .map((a) => a.primaryGenre)
-        .filter((g): g is string => Boolean(g))
-    )
+    new Set(artists.flatMap((a) => a.genres))
   ).sort()
 
   const ALL_LOCATIONS = Array.from(
     new Set(artists.flatMap((a) => a.locations))
   ).sort()
 
-  // Filter artists — genre filter matches PRIMARY only (C-1).
-  // Locations still use "artist tagged with at least one selected location".
+  // Filter artists — genre filter matches if ANY of the artist's genres is selected.
   const filteredArtists = artists
     .filter((artist) => {
       const genreMatch =
         selectedGenres.length === 0 ||
-        (artist.primaryGenre !== null &&
-          selectedGenres.includes(artist.primaryGenre))
+        artist.genres.some((g) => selectedGenres.includes(g))
       const locationMatch =
         selectedLocations.length === 0 ||
         artist.locations.some((l) => selectedLocations.includes(l))
@@ -71,6 +65,18 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
   }
 
   const activeFilterCount = selectedGenres.length + selectedLocations.length
+
+  /**
+   * Return the artist's genres ordered with PRIMARY first, then the rest
+   * in their natural order. Used to display on the card.
+   */
+  const orderedGenres = (artist: PublicArtist): string[] => {
+    if (!artist.primaryGenre) return artist.genres
+    return [
+      artist.primaryGenre,
+      ...artist.genres.filter((g) => g !== artist.primaryGenre),
+    ]
+  }
 
   return (
     <>
@@ -172,14 +178,14 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
               }}
             >
               <div className="pb-6 space-y-4">
-                {/* Genre filters — drawn from primary genres only */}
+                {/* Genre filters — all genres, not just primaries */}
                 {ALL_GENRES.length > 0 && (
                   <div>
                     <p
                       className="font-mono text-[10px] tracking-widest uppercase mb-2"
                       style={{ color: "#444" }}
                     >
-                      Primary Genre
+                      Genres
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {ALL_GENRES.map((genre) => {
@@ -315,37 +321,26 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
                         {artist.name}
                       </h3>
 
-                      {/* Show primary genre first on hover, then up to 1 more */}
-                      <div
-                        className="flex flex-wrap gap-1 mt-1 transition-all duration-300"
-                        style={{
-                          opacity: hoveredIndex === index ? 1 : 0,
-                          transform:
-                            hoveredIndex === index
-                              ? "translateY(0)"
-                              : "translateY(8px)",
-                        }}
-                      >
-                        {(() => {
-                          const ordered = artist.primaryGenre
-                            ? [
-                                artist.primaryGenre,
-                                ...artist.genres.filter(
-                                  (g) => g !== artist.primaryGenre
-                                ),
-                              ]
-                            : artist.genres
-                          return ordered.slice(0, 2).map((genre) => (
-                            <span
-                              key={genre}
-                              className="font-mono text-[9px] tracking-wider uppercase"
-                              style={{ color: "#4E7DFE" }}
-                            >
-                              {genre}
-                            </span>
-                          ))
-                        })()}
-                      </div>
+                      {/* Genres — comma-separated, primary first */}
+                      {artist.genres.length > 0 && (
+                        <div
+                          className="mt-1 transition-all duration-300"
+                          style={{
+                            opacity: hoveredIndex === index ? 1 : 0,
+                            transform:
+                              hoveredIndex === index
+                                ? "translateY(0)"
+                                : "translateY(8px)",
+                          }}
+                        >
+                          <span
+                            className="font-mono text-[9px] tracking-wider uppercase truncate block"
+                            style={{ color: "#4E7DFE" }}
+                          >
+                            {orderedGenres(artist).join(", ")}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Corner accent */}
