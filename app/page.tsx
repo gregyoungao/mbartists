@@ -1,6 +1,6 @@
 // =========================================================
 // Homepage — Hero + Featured Roster + Building Careers
-// + Artists Worldwide (map with own heading) + Footer
+// + Artists Worldwide (map with real artist regions) + Footer
 // =========================================================
 
 import HeroSection from '@/components/hero/HeroSection'
@@ -18,6 +18,11 @@ interface FeaturedArtist {
   name: string
   image: string
   genres: string[]
+}
+
+interface ArtistRegion {
+  name: string
+  region: string
 }
 
 async function getFeaturedArtists(): Promise<FeaturedArtist[]> {
@@ -52,8 +57,82 @@ async function getFeaturedArtists(): Promise<FeaturedArtist[]> {
   return mapped.slice(0, 10)
 }
 
+/**
+ * Convert a location name from the DB to the region key the map expects.
+ * Map uses lowercase, hyphenated keys; DB stores proper-case names.
+ * Returns null if the location doesn't correspond to a map region.
+ */
+function locationToRegionKey(name: string): string | null {
+  const normalized = name.trim().toLowerCase()
+  switch (normalized) {
+    case 'uk':
+    case 'united kingdom':
+      return 'uk'
+    case 'europe':
+      return 'europe'
+    case 'north america':
+      return 'north-america'
+    case 'south america':
+      return 'south-america'
+    case 'asia':
+      return 'asia'
+    case 'africa':
+    case 'south africa':
+      return 'africa'
+    case 'oceania':
+    case 'australia':
+      return 'oceania'
+    default:
+      return null
+  }
+}
+
+/**
+ * Fetch all non-archived artists with their associated locations.
+ * Each artist may have multiple locations; we emit one ArtistRegion
+ * entry per (artist, region) pair so the map counts everywhere they operate.
+ */
+async function getArtistRegions(): Promise<ArtistRegion[]> {
+  const supabase = getServiceClient()
+
+  const { data, error } = await supabase
+    .from('artists')
+    .select(`
+      name,
+      artist_locations ( locations ( name ) )
+    `)
+    .eq('archived', false)
+
+  if (error || !data) return []
+
+  const result: ArtistRegion[] = []
+
+  data.forEach((a: any) => {
+    const locations = (a.artist_locations || [])
+      .map((al: any) => al.locations?.name)
+      .filter(Boolean) as string[]
+
+    // Deduplicate the regions for this artist (in case multiple locations
+    // map to the same region) so we don't double-count.
+    const regions = new Set<string>()
+    locations.forEach((loc) => {
+      const region = locationToRegionKey(loc)
+      if (region) regions.add(region)
+    })
+
+    regions.forEach((region) => {
+      result.push({ name: a.name, region })
+    })
+  })
+
+  return result
+}
+
 export default async function Page() {
-  const featuredArtists = await getFeaturedArtists()
+  const [featuredArtists, artistRegions] = await Promise.all([
+    getFeaturedArtists(),
+    getArtistRegions(),
+  ])
 
   return (
     <main className="bg-black">
@@ -61,7 +140,7 @@ export default async function Page() {
       <HeroSection />
       <FeaturedRoster artists={featuredArtists} />
       <BuildingCareers />
-      <ArtistMap />
+      <ArtistMap artists={artistRegions} />
       <Footer />
     </main>
   )
