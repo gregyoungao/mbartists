@@ -56,7 +56,11 @@ export default async function AcademyPage() {
   return (
     <main className="min-h-screen bg-black text-white">
       <Navigation />
-      <ArtistsView artists={artists} />
+      <ArtistsView
+        artists={artists}
+        title="MB Academy Artists"
+        eyebrow="Rising Talent"
+      />
       <Footer />
     </main>
   )

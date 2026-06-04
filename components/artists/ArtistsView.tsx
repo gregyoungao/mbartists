@@ -4,7 +4,17 @@ import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import type { PublicArtist } from "@/app/artists/page"
 
-export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
+export default function ArtistsView({
+  artists,
+  title = "MB Artists",
+  eyebrow = "Our Roster",
+}: {
+  artists: PublicArtist[]
+  /** Page heading. Defaults to "MB Artists" for /artists; pass a custom value for /academy etc. */
+  title?: string
+  /** Small text above the heading. Defaults to "Our Roster". */
+  eyebrow?: string
+}) {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([])
   const [selectedLocations, setSelectedLocations] = useState<string[]>([])
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
@@ -95,10 +105,10 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
             className="font-mono text-xs tracking-widest uppercase mb-4"
             style={{ color: "#4E7DFE" }}
           >
-            Our Roster
+            {eyebrow}
           </p>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-balance mb-6">
-            MB Artists
+            {title}
           </h1>
           <p className="text-lg md:text-xl max-w-2xl" style={{ color: "#666" }}>
             {filteredArtists.length} artists
@@ -157,7 +167,7 @@ export default function ArtistsView({ artists }: { artists: PublicArtist[] }) {
                   </span>
                 )}
                 <span
-                  className="font-mono text-xs transition-transform duration-200"
+                  className="font-mono text-xl leading-none transition-transform duration-200"
                   style={{
                     color: filtersOpen ? "#4E7DFE" : "#888",
                     transform: filtersOpen ? "rotate(180deg)" : "rotate(0deg)",
