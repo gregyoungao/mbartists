@@ -39,7 +39,10 @@ export default function AgentForm({ initial = {}, mode }: Props) {
   const [existingPhotoUrl] = useState(initial.photoUrl || null)
 
   // Focal point (vertical): 0 = top, 50 = center, 100 = bottom. Default 50.
-  const [photoFocusY, setPhotoFocusY] = useState<number>(initial.photoFocusY ?? 50)
+  // Always start the focal point at the TOP of the image on page load,
+  // regardless of what was previously saved. Lets the user start from a
+  // known position and adjust downward with the slider as needed.
+  const [photoFocusY, setPhotoFocusY] = useState<number>(0)
 
   // Local URL for new file preview (revoked on cleanup)
   const [newFilePreviewUrl, setNewFilePreviewUrl] = useState<string | null>(null)
@@ -328,7 +331,7 @@ export function FocalPointEditor({
         <img
           src={src}
           alt="Focal point preview"
-          className="w-full h-full object-cover transition-[object-position] duration-100"
+          className="absolute inset-0 w-full h-full object-cover transition-[object-position] duration-100"
           style={{ objectPosition: `center ${value}%` }}
         />
       </div>
