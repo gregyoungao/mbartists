@@ -58,7 +58,7 @@ export default async function AcademyPage() {
       <Navigation />
       <ArtistsView
         artists={artists}
-        title="MB Academy Artists"
+        title="MB Academy"
         eyebrow="Rising Talent"
       />
       <Footer />
