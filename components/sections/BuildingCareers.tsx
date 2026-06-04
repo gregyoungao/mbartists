@@ -4,10 +4,11 @@ import Image from "next/image"
 import Link from "next/link"
 
 const ACCENT = "#4E7DFE"
-const IMAGE_1 =
-  "https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?auto=format&fit=crop&w=1200&q=80"
-const IMAGE_2 =
-  "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=80"
+
+// Real concert imagery — save the files to /public/images/ first
+// (see deployment notes below).
+const IMAGE_1 = "/images/concert-1.jpg"
+const IMAGE_2 = "/images/concert-2.jpg"
 
 export default function BuildingCareers() {
   return (
@@ -17,26 +18,26 @@ export default function BuildingCareers() {
     >
       <div className="px-4 md:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,3.2fr)] gap-x-12 gap-y-12 md:gap-y-16">
+          {/* Title — bottom-aligned with row 1 on desktop */}
           <h2
-            className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[0.95] md:self-end md:col-start-1 md:row-start-1"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[0.95] md:self-end md:col-start-1 md:row-start-1"
             style={{ color: "#fff" }}
           >
-            Building
+            Beyond Bookings.
             <br />
-            Careers
+            Building Careers.
           </h2>
 
+          {/* Row 1: top text + image 1 (bottom-aligned with title) */}
           <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)] gap-8 md:gap-10 md:items-end md:col-start-2 md:row-start-1">
             <p
               className="text-sm md:text-base leading-relaxed"
               style={{ color: "rgba(255,255,255,0.95)" }}
             >
-              MB Artists represents a dynamic roster of exceptional talent at
-              the forefront of the music industry. MB Artists is driven by a
-              clear ethos: to nurture, elevate, and champion every artist we
-              work with. Our goal is to help them build sustainable, successful
-              careers while maximising every opportunity and experience that
-              comes with life as a professional performer.
+              At MB Artists, representation is about more than securing shows.
+              We work alongside artists to develop long-term careers, create
+              meaningful opportunities and navigate the ever-changing global
+              music industry.
             </p>
             <div
               className="relative aspect-[4/3] overflow-hidden"
@@ -44,7 +45,7 @@ export default function BuildingCareers() {
             >
               <Image
                 src={IMAGE_1}
-                alt="Concert crowd"
+                alt="MB Artists festival crowd at sunset"
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 30vw"
@@ -52,6 +53,7 @@ export default function BuildingCareers() {
             </div>
           </div>
 
+          {/* Row 2: image 2 + bottom text (top-aligned) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 md:items-start md:col-start-2 md:row-start-2">
             <div
               className="relative aspect-[4/3] overflow-hidden"
@@ -59,43 +61,51 @@ export default function BuildingCareers() {
             >
               <Image
                 src={IMAGE_2}
-                alt="Festival performance"
+                alt="MB Artist on stage at Eternity"
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 40vw"
               />
             </div>
-            <div className="flex flex-col gap-7">
-              <p
-                className="text-sm md:text-base leading-relaxed"
-                style={{ color: "rgba(255,255,255,0.95)" }}
-              >
-                Founded to expertly manage artists&apos; schedules and
-                itineraries, MB Artists combines strategic career development
-                with a deep understanding of the ever-evolving music landscape.
-                Every booking, every tour, every collaboration is approached
-                with the same focus: building careers that last.
-              </p>
-              <Link
-                href="/book"
-                className="inline-flex items-center gap-3 self-start font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200"
-                style={{
-                  background: "#fff",
-                  color: "#000",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#000"
-                  e.currentTarget.style.color = ACCENT
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#fff"
-                  e.currentTarget.style.color = "#000"
-                }}
-              >
-                <span>Contact Us</span>
-                <span>{">"}</span>
-              </Link>
-            </div>
+            <p
+              className="text-sm md:text-base leading-relaxed"
+              style={{ color: "rgba(255,255,255,0.95)" }}
+            >
+              Through trusted relationships with major festivals, promoters,
+              brands and industry partners, we help artists expand their reach
+              while staying focused on what matters most: sustainable growth,
+              creative freedom and lasting success.
+            </p>
+          </div>
+
+          {/* Row 3 — closing tagline + CTA, spans the right column */}
+          <div className="md:col-start-2 md:row-start-3 flex flex-col gap-7 md:items-start">
+            <p
+              className="text-lg md:text-xl leading-[1.4] max-w-3xl font-medium"
+              style={{ color: "#fff" }}
+            >
+              From emerging talent to established headliners, our approach
+              remains the same — building careers that stand the test of time.
+            </p>
+            <Link
+              href="/book"
+              className="inline-flex items-center gap-3 self-start font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200"
+              style={{
+                background: "#fff",
+                color: "#000",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#000"
+                e.currentTarget.style.color = ACCENT
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#fff"
+                e.currentTarget.style.color = "#000"
+              }}
+            >
+              <span>Contact Us</span>
+              <span>{">"}</span>
+            </Link>
           </div>
         </div>
       </div>
