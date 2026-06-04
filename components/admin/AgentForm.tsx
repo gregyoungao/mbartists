@@ -274,9 +274,15 @@ function Input({
 }
 
 /**
- * Live preview + slider for vertical focal point (0-100, % from top).
- * The preview frame matches the hero aspect ratio so what you see here
- * is exactly what visitors see on the public profile page.
+ * Live preview + slider for vertical focal point.
+ *
+ * The slider sits directly above the preview frame so its position visually
+ * "controls" the image. Dragging the thumb to the RIGHT pushes the image
+ * DOWNWARD in the frame (revealing more of the top of the photo).
+ *
+ * Internally we still store value as 0-100 where 0 = top of image, 100 =
+ * bottom of image (the natural "% from top" convention). The slider input
+ * value is the inverse so the visual direction matches the image movement.
  */
 export function FocalPointEditor({
   src,
@@ -289,66 +295,47 @@ export function FocalPointEditor({
   onChange: (v: number) => void
   label?: string
 }) {
+  // Slider thumb position: LEFT = 0 (image up / show bottom),
+  //                       RIGHT = 100 (image down / show top)
+  const sliderPosition = 100 - value
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <p className="font-mono text-[10px] uppercase tracking-widest" style={{ color: '#555' }}>
         {`// ${label}`}
       </p>
 
-      {/* Preview frame uses approximate hero aspect (16/9) so it matches the live page */}
+      {/* Slider — connected directly to the top of the image preview */}
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={sliderPosition}
+        onChange={(e) => onChange(100 - parseInt(e.target.value, 10))}
+        className="w-full block cursor-pointer accent-[#4E7DFE]"
+        aria-label="Drag right to push image down, drag left to push image up"
+      />
+
+      {/* Preview frame — same aspect (16/9) as the hero on the public page */}
       <div
         className="relative w-full overflow-hidden border"
         style={{ aspectRatio: '16 / 9', borderColor: '#222' }}
       >
-        {/* The cropped photo, anchored at the current focal point */}
         <img
           src={src}
           alt="Focal point preview"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-[object-position] duration-100"
           style={{ objectPosition: `center ${value}%` }}
         />
-
-        {/* Subtle indicator line showing where the focal point is in the SOURCE image */}
-        {/* (helpful for understanding which part of the original photo is being centered) */}
-        <div
-          className="absolute left-0 right-0 pointer-events-none"
-          style={{
-            top: `${value}%`,
-            transform: 'translateY(-50%)',
-            height: '1px',
-            background: 'rgba(78, 125, 254, 0.6)',
-            boxShadow: '0 0 8px rgba(78, 125, 254, 0.6)',
-            display: 'none', // hidden — see note: object-position doesn't map 1:1 to source coords when cover-cropping
-          }}
-        />
-      </div>
-
-      {/* Slider with value display */}
-      <div className="flex items-center gap-4">
-        <span className="font-mono text-[10px] uppercase tracking-wider w-10" style={{ color: '#555' }}>
-          Top
-        </span>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={value}
-          onChange={(e) => onChange(parseInt(e.target.value, 10))}
-          className="flex-1 cursor-pointer accent-[#4E7DFE]"
-        />
-        <span className="font-mono text-[10px] uppercase tracking-wider w-12 text-right" style={{ color: '#555' }}>
-          Bottom
-        </span>
-        <span
-          className="font-mono text-xs px-2 py-1 border w-12 text-center"
-          style={{ borderColor: '#222', color: '#4E7DFE' }}
-        >
-          {value}
-        </span>
       </div>
 
       <p className="font-mono text-[10px]" style={{ color: '#555' }}>
-        Drag the slider to focus on the face. {value === 50 ? '(50 = center, default)' : value < 50 ? '(focused on upper part)' : '(focused on lower part)'}
+        Drag the slider right to push the image down (focus on top). Drag left to push the image up (focus on bottom).
+        {value === 50
+          ? ' Currently centered.'
+          : value < 50
+            ? ' Currently focused on the upper part.'
+            : ' Currently focused on the lower part.'}
       </p>
     </div>
   )
