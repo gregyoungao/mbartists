@@ -5,8 +5,7 @@ import Link from "next/link"
 
 const ACCENT = "#4E7DFE"
 
-// Real concert imagery — save the files to /public/images/ first
-// (see deployment notes below).
+// Real concert imagery — save the files to /public/images/ first.
 const IMAGE_1 = "/images/concert-1.jpg"
 const IMAGE_2 = "/images/concert-2.jpg"
 
@@ -53,7 +52,7 @@ export default function BuildingCareers() {
             </div>
           </div>
 
-          {/* Row 2: image 2 + bottom text (top-aligned) */}
+          {/* Row 2: image 2 + (bottom text → closing tagline → CTA), top-aligned */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 md:items-start md:col-start-2 md:row-start-2">
             <div
               className="relative aspect-[4/3] overflow-hidden"
@@ -67,45 +66,48 @@ export default function BuildingCareers() {
                 sizes="(max-width: 768px) 100vw, 40vw"
               />
             </div>
-            <p
-              className="text-sm md:text-base leading-relaxed"
-              style={{ color: "rgba(255,255,255,0.95)" }}
-            >
-              Through trusted relationships with major festivals, promoters,
-              brands and industry partners, we help artists expand their reach
-              while staying focused on what matters most: sustainable growth,
-              creative freedom and lasting success.
-            </p>
-          </div>
 
-          {/* Row 3 — closing tagline + CTA, spans the right column */}
-          <div className="md:col-start-2 md:row-start-3 flex flex-col gap-7 md:items-start">
-            <p
-              className="text-lg md:text-xl leading-[1.4] max-w-3xl font-medium"
-              style={{ color: "#fff" }}
-            >
-              From emerging talent to established headliners, our approach
-              remains the same — building careers that stand the test of time.
-            </p>
-            <Link
-              href="/book"
-              className="inline-flex items-center gap-3 self-start font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200"
-              style={{
-                background: "#fff",
-                color: "#000",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#000"
-                e.currentTarget.style.color = ACCENT
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#fff"
-                e.currentTarget.style.color = "#000"
-              }}
-            >
-              <span>Contact Us</span>
-              <span>{">"}</span>
-            </Link>
+            {/* Right column — bottom paragraph, then closing tagline, then CTA */}
+            <div className="flex flex-col gap-6">
+              <p
+                className="text-sm md:text-base leading-relaxed"
+                style={{ color: "rgba(255,255,255,0.95)" }}
+              >
+                Through trusted relationships with major festivals, promoters,
+                brands and industry partners, we help artists expand their
+                reach while staying focused on what matters most: sustainable
+                growth, creative freedom and lasting success.
+              </p>
+
+              <p
+                className="text-base md:text-lg leading-[1.45] font-medium"
+                style={{ color: "#fff" }}
+              >
+                From emerging talent to established headliners, our approach
+                remains the same — building careers that stand the test of
+                time.
+              </p>
+
+              <Link
+                href="/book"
+                className="inline-flex items-center gap-3 self-start font-mono text-xs uppercase tracking-widest px-6 py-3 transition-all duration-200"
+                style={{
+                  background: "#fff",
+                  color: "#000",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#000"
+                  e.currentTarget.style.color = ACCENT
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#fff"
+                  e.currentTarget.style.color = "#000"
+                }}
+              >
+                <span>Contact Us</span>
+                <span>{">"}</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
