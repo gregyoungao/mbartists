@@ -46,6 +46,7 @@ export interface Agent {
   contact_email: string | null
   bio: string | null
   photo_url: string | null
+  photo_focus_y: number | null
   role: string | null
   role_order: number | null
   instagram: string | null
@@ -57,6 +58,8 @@ export interface Artist {
   slug: string
   name: string
   image_url: string | null
+  /** Vertical focal point 0-100 — used by the public profile hero crop */
+  image_focus_y: number | null
   primary_agent: Agent | null
   secondary_agent: Agent | null
   small_bio: string | null
@@ -74,6 +77,8 @@ export interface Artist {
   spotlight_4: string | null
   genres: Genre[]
   locations: Location[]
+  /** ID of the artist's primary genre (must be one of `genres`). */
+  primary_genre_id: string | null
 }
 
 // =========================================================
@@ -81,13 +86,13 @@ export interface Artist {
 // =========================================================
 
 const ARTIST_SELECT = `
-  id, slug, name, image_url,
+  id, slug, name, image_url, image_focus_y, primary_genre_id,
   small_bio, large_bio,
   academy_artist, featured_artist,
   instagram, spotify, soundcloud, facebook, tiktok,
   spotlight_1, spotlight_2, spotlight_3, spotlight_4,
-  primary_agent:agents!primary_agent_id (id, slug, name, email, contact_email, bio, photo_url, role, role_order, instagram, linkedin),
-  secondary_agent:agents!secondary_agent_id (id, slug, name, email, contact_email, bio, photo_url, role, role_order, instagram, linkedin),
+  primary_agent:agents!primary_agent_id (id, slug, name, email, contact_email, bio, photo_url, photo_focus_y, role, role_order, instagram, linkedin),
+  secondary_agent:agents!secondary_agent_id (id, slug, name, email, contact_email, bio, photo_url, photo_focus_y, role, role_order, instagram, linkedin),
   artist_genres ( genres ( id, slug, name ) ),
   artist_locations ( locations ( id, slug, name ) )
 `
@@ -98,6 +103,7 @@ function shapeArtist(row: any): Artist {
     slug: row.slug,
     name: row.name,
     image_url: row.image_url,
+    image_focus_y: row.image_focus_y ?? null,
     small_bio: row.small_bio,
     large_bio: row.large_bio,
     academy_artist: row.academy_artist,
@@ -115,6 +121,7 @@ function shapeArtist(row: any): Artist {
     secondary_agent: row.secondary_agent || null,
     genres: (row.artist_genres || []).map((g: any) => g.genres).filter(Boolean),
     locations: (row.artist_locations || []).map((l: any) => l.locations).filter(Boolean),
+    primary_genre_id: row.primary_genre_id ?? null,
   }
 }
 
