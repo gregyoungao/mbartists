@@ -56,6 +56,10 @@ export default function AgentForm({ initial = {}, mode }: Props) {
     }
     const url = URL.createObjectURL(photoFile)
     setNewFilePreviewUrl(url)
+    // When a fresh photo is uploaded, default the focal point to the TOP
+    // of the image so the user starts from a known, predictable framing
+    // and adjusts downward with the slider as needed.
+    setPhotoFocusY(0)
     return () => URL.revokeObjectURL(url)
   }, [photoFile])
 

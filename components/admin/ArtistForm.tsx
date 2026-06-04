@@ -90,6 +90,10 @@ export default function ArtistForm({
     }
     const url = URL.createObjectURL(imageFile)
     setNewFilePreviewUrl(url)
+    // When a fresh photo is uploaded, default the focal point to the TOP
+    // of the image so the user starts from a known, predictable framing
+    // and adjusts downward with the slider as needed.
+    setImageFocusY(0)
     return () => URL.revokeObjectURL(url)
   }, [imageFile])
 
