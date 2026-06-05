@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server'
 import { getServiceClient } from '@/lib/supabase'
 import { getCurrentUser } from '@/lib/auth'
+import { getRoleOrder } from '@/lib/roles'
 
 export async function POST(req: Request) {
   const user = await getCurrentUser()
@@ -54,11 +55,16 @@ export async function POST(req: Request) {
       }
     }
 
+    const role = String(fd.get('role') || '').trim()
+
     const updates: any = {
       name: String(fd.get('name') || '').trim(),
       contact_email: String(fd.get('contactEmail') || '').trim() || null,
       bio: String(fd.get('bio') || '').trim(),
-      role: String(fd.get('role') || '').trim(),
+      role,
+      // Keep role_order in lockstep with role — calculated from the canonical
+      // mapping in lib/roles.ts. Never set role without also setting this.
+      role_order: getRoleOrder(role),
       instagram: String(fd.get('instagram') || '').trim() || null,
       linkedin: String(fd.get('linkedin') || '').trim() || null,
       photo_url,
