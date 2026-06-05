@@ -130,7 +130,7 @@ export default function Footer() {
           </p>
 
           <Link
-            href="#"
+            href="/privacy"
             className="font-mono text-[10px] uppercase tracking-wider transition-colors hover:text-[#4E7DFE] order-1 md:order-2"
             style={{ color: "#888" }}
           >
