@@ -1,29 +1,26 @@
-import type { Metadata } from 'next'
-import { Space_Grotesk, Space_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import './globals.css'
+// =========================================================
+// app/layout.tsx — add or update this `metadata` export
+// =========================================================
+// Drop this `metadata` block into your existing root layout file.
+// (Keep all your other layout code — html tag, body, fonts, etc.
+//  This block goes alongside, not as a replacement for the file.)
+// =========================================================
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-sans',
-})
-const spaceMono = Space_Mono({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-mono',
-})
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   // Title template — child pages can set their own `title` and it
-  // gets formatted as e.g. "Privacy Policy | MB Artists".
+  // gets formatted as e.g. "SVDKO | MB Artists Agency".
   // If a page doesn't set a title, the default kicks in.
   title: {
     default: 'MB Artists Agency',
     template: '%s | MB Artists',
   },
+
   description:
     'MB Artists Agency — global booking agency representing emerging and established electronic music artists. Tech house, deep house, techno, bass and more.',
-  // Used by social shares (LinkedIn, WhatsApp, Slack, iMessage previews)
+
+  // Used by social shares and search engines
   openGraph: {
     title: 'MB Artists Agency',
     description:
@@ -32,28 +29,15 @@ export const metadata: Metadata = {
     url: 'https://mbartists.vercel.app',
     type: 'website',
   },
-  // X / Twitter share card
+
+  // Twitter / X share card (compatible with X)
   twitter: {
     card: 'summary',
     title: 'MB Artists Agency',
     description:
       'Global booking agency representing electronic music artists worldwide.',
   },
+
   // Tells search engines the canonical base URL
   metadataBase: new URL('https://mbartists.vercel.app'),
-}
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
-  return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
-      <body className="font-sans antialiased bg-background text-foreground">
-        {children}
-        <Analytics />
-      </body>
-    </html>
-  )
 }
