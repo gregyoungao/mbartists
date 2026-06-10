@@ -23,8 +23,6 @@ export default function BuildingCareers() {
             style={{ color: "#fff" }}
           >
             Beyond Bookings.
-            <br />
-            Building Careers.
           </h2>
 
           {/* Row 1: top text + image 1 (bottom-aligned with title) */}
@@ -33,10 +31,8 @@ export default function BuildingCareers() {
               className="text-sm md:text-base leading-relaxed"
               style={{ color: "rgba(255,255,255,0.95)" }}
             >
-              At MB Artists, representation is about more than securing shows.
-              We work alongside artists to develop long-term careers, create
-              meaningful opportunities and navigate the ever-changing global
-              music industry.
+              At MB Artists, representation is more than securing bookings,
+              it's about building careers.
             </p>
             <div
               className="relative aspect-[4/3] overflow-hidden"
