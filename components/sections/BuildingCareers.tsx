@@ -32,7 +32,9 @@ export default function BuildingCareers() {
               style={{ color: "rgba(255,255,255,0.95)" }}
             >
               At MB Artists, representation is more than securing bookings,
-              it's about building careers.
+              it's about building careers. We work alongside artists to
+              develop long-term careers, create meaningful opportunities and
+              navigate the ever-changing global music industry.
             </p>
             <div
               className="relative aspect-[4/3] overflow-hidden"
