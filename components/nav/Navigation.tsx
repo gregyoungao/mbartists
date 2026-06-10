@@ -236,7 +236,7 @@ export default function Navigation() {
                     }}
                   >
                     <a
-                      href="https://instagram.com/mbartists"
+                      href="https://www.instagram.com/mbartistsagency"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-mono text-xs uppercase tracking-wider transition-colors duration-200 hover:text-[#4E7DFE]"
@@ -245,22 +245,13 @@ export default function Navigation() {
                       Instagram
                     </a>
                     <a
-                      href="https://facebook.com/mbartists"
+                      href="https://www.facebook.com/MBartistsUK"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-mono text-xs uppercase tracking-wider transition-colors duration-200 hover:text-[#4E7DFE]"
                       style={{ color: "#aaa" }}
                     >
                       Facebook
-                    </a>
-                    <a
-                      href="https://twitter.com/mbartists"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-xs uppercase tracking-wider transition-colors duration-200 hover:text-[#4E7DFE]"
-                      style={{ color: "#aaa" }}
-                    >
-                      Twitter
                     </a>
                   </div>
                 </div>
